@@ -2,7 +2,8 @@
 
 ## Dieses Skript ueberprueft das mp3-gain-tag in mp3-Dateien.
 ## Wenn es nicht vorhanden ist, wird die Lautheit der Datei 
-## analysiert und das Tag geschrieben
+## analysiert und das Tag geschrieben.
+## http://wiki.ubuntuusers.de/MP3Gain
 ## Das Skript ist abhaengig von: mp3gain (sudo apt-get install mp3gain)
 # 
 # This script examines the mp3-gain-tag in mp3-files.
