@@ -48,10 +48,10 @@ echo -n "${NAUTILUS_SCRIPT_SELECTED_FILE_PATHS}" | while read file ; do
 report "mp3trimmer"
 (
 
-	# pruefen ob noetige pakete installiert
+	# check for packages
 	f_check_package "sox"
 	filename=$(basename "$file")
-	# echo damit progress beginnt zu pulsieren
+	# echo and progress will pulsate
 	echo "10"
 	echo "# Bearbeitung ...\n$filename"
 	endung=${file##*\.}
@@ -59,7 +59,7 @@ report "mp3trimmer"
 		zenity --error --text="Ausgewählte Datei ist keine mp3-Datei:\n$file" 
 		exit
 	fi
-	# originaldatei in unterordner kopieren
+	# copy original file in to subfolder
 	mkdir -p original
 	path_source=$(dirname "$file")
 	file_path_orig="$path_source/original/$filename"
@@ -75,7 +75,6 @@ report "mp3trimmer"
 
 	echo "# mp3Gain-Anpassung...\n$filename"
 	meldung=$(mp3gain -r "$file" 2>&1 && echo "Ohne_Fehler_beendet")
-	#meldung=$(mp3gain -r "${file%%.*}.mp3" 2>&1 && echo "Ohne_Fehler_beendet")
 	# alle zeichen von rechts nach dem 'O' fuer fehleranalyse extrahieren
 	error=${meldung##*O}
 	if [ "$error" != "hne_Fehler_beendet" ]
