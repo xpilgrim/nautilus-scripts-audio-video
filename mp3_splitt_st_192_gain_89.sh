@@ -217,7 +217,7 @@ report "mp3split"
 			 --entry --text \
 			"Die mp3-Datei hat eine Laenge von: $minutes Minuten. 
 Zum Teilen bitte Startpunkt und Dauer der gewuenschten Abschnitte in [mm:ss-mm:ss] eingeben!
-Für mehere Teile bitte durch Schraegstriche trennen.
+Für mehrere Teile bitte durch Schraegstriche trennen.
 z.B. zwei aufeinanderfolgende Teile von 60 Minuten Laenge: [00:00-60:00/60:00-60:00]  " \
 			--entry-text "00:00-60:00/60:00-60:00")
 
