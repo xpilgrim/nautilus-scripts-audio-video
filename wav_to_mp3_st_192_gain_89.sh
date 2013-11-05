@@ -39,16 +39,16 @@ echo -n "${NAUTILUS_SCRIPT_SELECTED_FILE_PATHS}" | while read file ; do
 report "wavtomp3gain"
 (
 
-	# pruefen ob noetige pakete installiert
+	# check for packages
 	f_check_package "mp3gain"
 	f_check_package "lame"
-
-	# echo damit progress beginnt zu pulsieren
+	filename=$(basename "$file")
+	# echo and progress will pulsate
 	echo "10"
-	echo "# Konvertierung in mp3...\n$file"
+	echo "# Konvertierung in mp3...\n$filename"
 	endung=${file##*\.}
 	if [ "$endung" != "wav" ]; then
-		zenity --error --text="Ausgewählte Datei ist keine wav-Datei:\n$file" 
+		zenity --error --text="Ausgewählte Datei ist keine wav-Datei:\n$filename" 
 		exit
 	fi
 	meldung=$(lame -b 192 -m s -o -S "$file" "${file%%.*}.mp3" 2>&1 && echo "Ohne_Fehler_beendet")
@@ -59,7 +59,7 @@ report "wavtomp3gain"
 		echo "$meldung" | zenity --title="mp3-Konvertierungs-Fehler " --text-info --width=500 --height=200
 	fi
 
-	echo "# mp3Gain-Anpassung...\n${file%%.*}.mp3"
+	echo "# mp3Gain-Anpassung...\n${filename%%.*}.mp3"
 	meldung=$(mp3gain -r "${file%%.*}.mp3" 2>&1 && echo "Ohne_Fehler_beendet")
 	# alle zeichen von rechts nach dem 'O' fuer fehleranalyse extrahieren
 	error=${meldung##*O}
