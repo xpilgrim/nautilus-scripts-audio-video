@@ -37,12 +37,12 @@ echo -n "${NAUTILUS_SCRIPT_SELECTED_FILE_PATHS}" | while read file ; do
 report "videotowav"
 (
 
-	# pruefen ob noetige pakete installiert
+	# check for packages
 	f_check_package "ffmpeg"
-
-	# echo damit progress beginnt zu pulsieren
+	filename=$(basename "$file")
+	# echo and progress will pulsate
 	echo "10"
-	echo "# Konvertierung in wav...\n$file"
+	echo "# Konvertierung in wav...\n$filename"
 	meldung=$(ffmpeg -y -i "$file" -ar 44100 -vn -acodec pcm_s16le -map 0:2 -ac 2 ${file%%.*}.wav 2>&1 && echo "Ohne_Fehler_beendet")
 	# alle zeichen von rechts nach dem 'O' fuer fehleranalyse extrahieren
 	error=${meldung##*O}
