@@ -22,7 +22,7 @@
 #
 # Author: Joerg Sorge
 # Distributed under the terms of GNU GPL version 2 or later
-# Copyright (C) Joerg Sorge joergsorge@gmail.com
+# Copyright (C) Joerg Sorge joergsorge at gmail com
 # 2011-09-01
 
 function f_check_package () {
@@ -39,23 +39,24 @@ echo -n "${NAUTILUS_SCRIPT_SELECTED_FILE_PATHS}" | while read file ; do
 
 report "mp3gain"
 (
-	# pruefen ob noetige pakete installiert
+	# check for packages
 	f_check_package "mp3gain"
 
-	# echo damit progress beginnt zu pulsieren
+	# echo and progress will pulsate
 	echo "10"
-	echo "# mp3-Gain anpassen auf 89 dB SPL:\n$file"
+	filename=$(basename "$file")
+	echo "# mp3-Gain anpassen auf 89 dB SPL:\n$filename"
 
 	endung=${file##*\.}
 	if [ "$endung" != "mp3" ]; then
-		zenity --error --text="Ausgewählte Datei ist keine mp3-Datei:\n$file" 
+		zenity --error --text="Ausgewählte Datei ist keine mp3-Datei:\n$filename" 
 		exit
 	fi
-	# mp3gain ausführen	
+	# run mp3gain
 	# ergebnis durch $(befehle) in meldung schreiben
 	meldung=$(mp3gain -r "$file" 2>&1 && echo "Ohne_Fehler_beendet")
 	
-	# alle zeichen von rechts nach dem 'O' fuer fehleranalyse extrahieren
+	# alle zeichen von rechts nach dem 'O' fuer fehlercheck extrahieren
 	error=${meldung##*O}
 	if [ "$error" != "hne_Fehler_beendet" ]
 		then
