@@ -149,8 +149,8 @@ report "mp3split"
 
 	if [ $minutes -gt 60 ] ; then
 		# wenn laenger als 60 Minuten, entspr.Anzahl 60-Minuten-Bloecke vorschlagen 
-		answer=$(zenity  --width=500 --list  --text "Die Datei hat eine Laenge von $minutes Minuten"\
-		 --radiolist  --column "Pick" --column "Auswahl"\
+		answer=$(zenity --height=200 --width=500 --list --text "Die Datei hat eine Laenge von $minutes Minuten"\
+		 --radiolist --column "Pick" --column "Auswahl"\
 		 TRUE "In $parts_60 gleich lange 60-Minuten Abschnitte teilen! "\
 		 FALSE "Manuelle Splittpoints angeben")
 	else
