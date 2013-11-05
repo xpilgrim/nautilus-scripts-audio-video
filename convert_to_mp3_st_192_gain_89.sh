@@ -40,21 +40,27 @@ echo -n "${NAUTILUS_SCRIPT_SELECTED_FILE_PATHS}" | while read file ; do
 
 report "mp3gain"
 (
-	# pruefen ob noetige pakete installiert
+	# check for packages
 	f_check_package "mp3gain"
 	f_check_package "ffmpeg"
 	f_check_package "lame"
 
-	#z = $z+1
-	# echo damit progress beginnt zu pulsieren
+	# echo and progress will pulsate
 	echo "10"
-	echo "# Konvertierung in wav...\n$file"
+	filename=$(basename "$file")
+	extension="${filename##*.}"
+	echo "# Konvertierung in wav...\n$filename"
 	# ffmpeg und mencoder braucht irgendwie als stdin < /dev/null sonst wird nur die erste datei der schleife abgearbeitet 
 	ffmpeg -i "$file" < /dev/null -acodec pcm_s16le -ac 2 -ar 44100 "${file%%.*}_.wav" > /dev/null
 	
 	if [ -f "${file%%.*}_.wav" ]
   		then
-		echo "# Konvertierung in mp3...\n$file"
+		echo "# Konvertierung in mp3...\n$filename"
+		# save original file
+		if [ "$extension" == "mp3" ]
+			then
+			mv "$file" "${file%%.mp3}_old.mp3"
+		fi
 		meldung=$(lame -b 192 -m s -o -S "${file%%.*}_.wav" "${file%%.*}.mp3" 2>&1 && echo "Ohne_Fehler_beendet")
 		# alle zeichen von rechts nach dem 'O' fuer fehleranalyse extrahieren
 		error=${meldung##*O}
@@ -66,7 +72,7 @@ report "mp3gain"
 		#tempfile loeschen	
 		rm -f "${file%%.*}_.wav"
 
-		echo "# mp3-Gain-Anpassung...\n${file%%.*}.mp3"
+		echo "# mp3-Gain-Anpassung...\n${filename%%.*}.mp3"
 		meldung=$(mp3gain -r "${file%%.*}.mp3" 2>&1 && echo "Ohne_Fehler_beendet")
 		# alle zeichen von rechts nach dem 'O' fuer fehleranalyse extrahieren
 		error=${meldung##*O}
