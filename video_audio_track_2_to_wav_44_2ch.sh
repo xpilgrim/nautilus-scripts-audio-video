@@ -43,12 +43,12 @@ report "videotowav"
 	# echo and progress will pulsate
 	echo "10"
 	echo "# Konvertierung in wav...\n$filename"
-	meldung=$(ffmpeg -y -i "$file" -ar 44100 -vn -acodec pcm_s16le -map 0:2 -ac 2 ${file%%.*}.wav 2>&1 && echo "Ohne_Fehler_beendet")
-	# alle zeichen von rechts nach dem 'O' fuer fehleranalyse extrahieren
-	error=${meldung##*O}
+	message=$(ffmpeg -y -i "$file" -ar 44100 -vn -acodec pcm_s16le -map 0:2 -ac 2 ${file%%.*}.wav 2>&1 && echo "Ohne_Fehler_beendet")
+	# remove all characters right from 'O'
+	error=${message##*O}
 	if [ "$error" != "hne_Fehler_beendet" ]
 		then
-		echo "$meldung" | zenity --title="wav-Konvertierungs-Fehler " --text-info --width=500 --height=200
+		echo "$message" | zenity --title="wav-Konvertierungs-Fehler " --text-info --width=500 --height=200
 	fi
 
 ) | zenity --progress \
