@@ -43,29 +43,30 @@ report "wavtomp3gain"
 	f_check_package "mp3gain"
 	f_check_package "lame"
 	filename=$(basename "$file")
+	extension="${filename##*.}"
 	# echo and progress will pulsate
 	echo "10"
 	echo "# Konvertierung in mp3...\n$filename"
-	endung=${file##*\.}
-	if [ "$endung" != "wav" ]; then
+	
+	if [ "$extension" != "wav" ] && [ "$extension" != "WAV" ]; then
 		zenity --error --text="Ausgewählte Datei ist keine wav-Datei:\n$filename" 
 		exit
 	fi
-	meldung=$(lame -b 192 -m s -o -S "$file" "${file%%.*}.mp3" 2>&1 && echo "Ohne_Fehler_beendet")
-	# alle zeichen von rechts nach dem 'O' fuer fehleranalyse extrahieren
-	error=${meldung##*O}
+	message=$(lame -b 192 -m s -o -S "$file" "${file%%.*}.mp3" 2>&1 && echo "Ohne_Fehler_beendet")
+	# remove all characters right from 'O'
+	error=${message##*O}
 	if [ "$error" != "hne_Fehler_beendet" ]
 		then
-		echo "$meldung" | zenity --title="mp3-Konvertierungs-Fehler " --text-info --width=500 --height=200
+		echo "$message" | zenity --title="mp3-Konvertierungs-Fehler " --text-info --width=500 --height=200
 	fi
 
 	echo "# mp3Gain-Anpassung...\n${filename%%.*}.mp3"
-	meldung=$(mp3gain -r "${file%%.*}.mp3" 2>&1 && echo "Ohne_Fehler_beendet")
-	# alle zeichen von rechts nach dem 'O' fuer fehleranalyse extrahieren
-	error=${meldung##*O}
+	message=$(mp3gain -r "${file%%.*}.mp3" 2>&1 && echo "Ohne_Fehler_beendet")
+	# remove all characters right from 'O'
+	error=${message##*O}
 	if [ "$error" != "hne_Fehler_beendet" ]
 		then
-		echo "$meldung" | zenity --title="mp3Gain-Fehler " --text-info --width=500 --height=200
+		echo "$message" | zenity --title="mp3Gain-Fehler " --text-info --width=500 --height=200
 	fi
 
 ) | zenity --progress \
