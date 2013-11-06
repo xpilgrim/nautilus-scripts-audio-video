@@ -53,10 +53,10 @@ report "mp3gain"
 		exit
 	fi
 	# run mp3gain
-	# write result with $(befehle) in message
+	# write result with $(commands) in message
 	message=$(mp3gain -r "$file" 2>&1 && echo "Ohne_Fehler_beendet")
 	
-	# alle zeichen von rechts nach dem 'O' fuer fehlercheck extrahieren
+	# remove all characters right from 'O'
 	error=${message##*O}
 	if [ "$error" != "hne_Fehler_beendet" ]
 		then
