@@ -45,22 +45,22 @@ report "mp3gain"
 	# echo and progress will pulsate
 	echo "10"
 	filename=$(basename "$file")
+	extension="${filename##*.}"
 	echo "# mp3-Gain anpassen auf 89 dB SPL:\n$filename"
 
-	endung=${file##*\.}
-	if [ "$endung" != "mp3" ]; then
+	if [ "$extension" != "mp3" ] && [ "$extension" != "MP3" ]; then
 		zenity --error --text="Ausgewählte Datei ist keine mp3-Datei:\n$filename" 
 		exit
 	fi
 	# run mp3gain
-	# ergebnis durch $(befehle) in meldung schreiben
-	meldung=$(mp3gain -r "$file" 2>&1 && echo "Ohne_Fehler_beendet")
+	# write result with $(befehle) in message
+	message=$(mp3gain -r "$file" 2>&1 && echo "Ohne_Fehler_beendet")
 	
 	# alle zeichen von rechts nach dem 'O' fuer fehlercheck extrahieren
-	error=${meldung##*O}
+	error=${message##*O}
 	if [ "$error" != "hne_Fehler_beendet" ]
 		then
-		echo "$meldung" | zenity --title="mp3Gain-Fehler " --text-info --width=500 --height=200
+		echo "$message" | zenity --title="mp3Gain-Fehler " --text-info --width=500 --height=200
 	fi
 
 ) | zenity --progress \
