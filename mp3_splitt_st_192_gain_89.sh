@@ -136,12 +136,13 @@ report "mp3split"
 	f_check_package "lame"
 	f_check_package "ffmpeg"
 	filename=$(basename "$file")
+	extension="${filename##*.}"
 	# echo damit progress beginnt zu pulsieren
 	echo "10"
 	echo "# Analyse...\n$filename"
-	endung=${file##*\.}
-	if [ "$endung" != "mp3" ]; then
-		zenity --error --text="Ausgewählte Datei ist keine wav-Datei:\n$filename" 
+
+	if [ "$extension" != "mp3" ] && [ "$extension" != "MP3" ]; then
+		zenity --error --text="Ausgewählte Datei ist keine mp3-Datei:\n$filename" 
 		exit
 	fi
 	minutes=$(mp3info -p "%m" "$file" )
