@@ -20,7 +20,7 @@ echo "Nautilus-Scripts aktualisieren..."
 for i in *.sh
 do
    :
-	if [ "$i" != "update_nautilus_scripts.sh" ] 
+	if [ "$i" != "update_nautilus_scripts_ubuntu_13_local.sh" ] 
 		then	
 		echo "$i"
 		cp $i /home/$USER/.local/share/nautilus/scripts/
