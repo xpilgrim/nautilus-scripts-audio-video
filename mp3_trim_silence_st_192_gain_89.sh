@@ -51,11 +51,12 @@ report "mp3trimmer"
 	# check for packages
 	f_check_package "sox"
 	filename=$(basename "$file")
+	extension="${filename##*.}"
 	# echo and progress will pulsate
 	echo "10"
 	echo "# Bearbeitung ...\n$filename"
-	endung=${file##*\.}
-	if [ "$endung" != "mp3" ]; then
+	
+	if [ "$extension" != "mp3" ] && [ "$extension" != "MP3" ]; then
 		zenity --error --text="Ausgewählte Datei ist keine mp3-Datei:\n$file" 
 		exit
 	fi
