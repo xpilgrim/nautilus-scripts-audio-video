@@ -15,7 +15,7 @@
 # sudo chmod +x /usr/share/nautilus-scripts/video_audio_track_2_to_wav_44_2ch.sh
 # sudo ln -s /usr/share/nautilus-scripts/video_audio_track_2_to_wav_44_2ch.sh ~/.gnome2/nautilus-scripts/video_audio_track_2_to_wav_44_2ch
 #
-# dependent on: ffmpeg
+# dependent on: libav-tools
 #
 # Author: Joerg Sorge
 # Distributed under the terms of GNU GPL version 2 or later
@@ -38,12 +38,12 @@ report "videotowav"
 (
 
 	# check for packages
-	f_check_package "ffmpeg"
+	f_check_package "libav-tools"
 	filename=$(basename "$file")
 	# echo and progress will pulsate
 	echo "10"
 	echo "# Konvertierung in wav...\n$filename"
-	message=$(ffmpeg -y -i "$file" -ar 44100 -vn -acodec pcm_s16le -map 0:2 -ac 2 ${file%%.*}.wav 2>&1 && echo "Ohne_Fehler_beendet")
+	message=$(avconv -y -i "$file" -ar 44100 -vn -acodec pcm_s16le -map 0:2 -ac 2 ${file%%.*}.wav 2>&1 && echo "Ohne_Fehler_beendet")
 	# remove all characters right from 'O'
 	error=${message##*O}
 	if [ "$error" != "hne_Fehler_beendet" ]
