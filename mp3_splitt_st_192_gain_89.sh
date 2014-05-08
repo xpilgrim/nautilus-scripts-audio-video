@@ -100,7 +100,7 @@ function f_wave_temp () {
 	file_source=$1
 	file_dest=$2
 	#zenity --info --text="s_ $file_source d_ $file_dest"
-	ffmpeg -i "$file_source" < /dev/null -acodec pcm_s16le -ac 2 -ar 44100 "$file_dest" > /dev/null
+	avconv -i "$file_source" < /dev/null -acodec pcm_s16le -ac 2 -ar 44100 "$file_dest" > /dev/null
 }
 
 function f_wave_to_mp3 () {
@@ -134,7 +134,7 @@ report "mp3split"
 	f_check_package "mp3gain"
 	f_check_package "mp3info"
 	f_check_package "lame"
-	f_check_package "ffmpeg"
+	f_check_package "libav-tools"
 	filename=$(basename "$file")
 	extension="${filename##*.}"
 	# echo damit progress beginnt zu pulsieren
