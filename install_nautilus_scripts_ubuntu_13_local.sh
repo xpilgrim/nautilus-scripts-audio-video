@@ -26,7 +26,7 @@ do
 done
 echo "Libs installieren..."
 sudo apt-get install \
-lame mp3val libid3-tools mp3gain mp3info sox ffmpeg libsox-fmt-mp3 \
+lame mp3val libid3-tools mp3gain mp3info sox libav-tools libsox-fmt-mp3 \
 curl gawk links libtranslate-bin
 
 # nautius reset
