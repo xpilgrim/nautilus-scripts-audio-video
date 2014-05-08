@@ -1,7 +1,7 @@
 #!/bin/bash
 
-## Dieses Skript konvertiert audio-Dateien (Formate mit denen die ffmpeg-Libs umgehen koennen) in mp3 und passt die Lautheit mit mp3gain an
-## ffmpeg lame und mp3gain muss installiert sein z.B.: sudo apt-get install lame/ sudo apt-get install mp3gain
+## Dieses Skript konvertiert audio-Dateien (Formate mit denen die libav-Libs umgehen koennen) in mp3 und passt die Lautheit mit mp3gain an
+## libav-tools lame und mp3gain muss installiert sein z.B.: sudo apt-get install lame/ sudo apt-get install mp3gain
 #
 # This script convert audio-files to mp3-files, analyses the mp3-gain and write the mp3gain-tag.
 #
@@ -15,7 +15,7 @@
 # sudo chmod +x /usr/share/nautilus-scripts/convert_to_mp3_st_192_gain_89.sh
 # sudo ln -s /usr/share/nautilus-scripts/convert_to_mp3_st_192_gain_89.sh ~/.gnome2/nautilus-scripts/convert_to_mp3_st_192_gain_89
 #
-# dependent on: ffmpeg, lame, mp3gain
+# dependent on: libav-tools, lame, mp3gain
 # if not alraedy on your system, type for example:
 # sudo apt-get install mp3gain
 #
@@ -42,7 +42,7 @@ report "mp3gain"
 (
 	# check for packages
 	f_check_package "mp3gain"
-	f_check_package "ffmpeg"
+	f_check_package "libav-tools"
 	f_check_package "lame"
 
 	# echo and progress will pulsate
@@ -51,7 +51,7 @@ report "mp3gain"
 	extension="${filename##*.}"
 	echo "# Konvertierung in wav...\n$filename"
 	# ffmpeg und mencoder braucht irgendwie als stdin < /dev/null sonst wird nur die erste datei der schleife abgearbeitet 
-	ffmpeg -i "$file" < /dev/null -acodec pcm_s16le -ac 2 -ar 44100 "${file%%.*}_.wav" > /dev/null
+	libav-tools -i "$file" < /dev/null -acodec pcm_s16le -ac 2 -ar 44100 "${file%%.*}_.wav" > /dev/null
 	
 	if [ -f "${file%%.*}_.wav" ]
   		then
