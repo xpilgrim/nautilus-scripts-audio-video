@@ -51,7 +51,7 @@ report "mp3gain"
 	extension="${filename##*.}"
 	echo "# Konvertierung in wav...\n$filename"
 	# ffmpeg und mencoder braucht irgendwie als stdin < /dev/null sonst wird nur die erste datei der schleife abgearbeitet 
-	libav-tools -i "$file" < /dev/null -acodec pcm_s16le -ac 2 -ar 44100 "${file%%.*}_.wav" > /dev/null
+	avconv -i "$file" < /dev/null -acodec pcm_s16le -ac 2 -ar 44100 "${file%%.*}_.wav" > /dev/null
 	
 	if [ -f "${file%%.*}_.wav" ]
   		then
