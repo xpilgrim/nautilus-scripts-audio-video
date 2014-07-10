@@ -31,7 +31,9 @@ do
 	fi
 
 	echo "$i"
+	# keep off extentions
 	filename=$(basename "$i")
+	filename="${filename%.*}"
 	cp $i /home/$USER/.local/share/nautilus/scripts/$filename
 	chmod +x /home/$USER/.local/share/nautilus/scripts/$filename
 
