@@ -45,6 +45,7 @@ if [ $UID -eq 0 ] ; then
 	curl gawk links libtranslate-bin
 else
 	echo "You are not Admin, Install of Libs uncompleted..."
+	echo "Maybe, libs already installed. If not: Do so as Admin!"
 fi
 
 # nautius reset
