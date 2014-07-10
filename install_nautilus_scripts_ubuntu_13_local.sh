@@ -12,7 +12,7 @@
 # 2013-07-25
 
 
-echo "Nautilus-Scripts installieren..."
+echo "Install Nautilus-Scripts..."
 
 for i in *.sh
 do
@@ -31,14 +31,19 @@ do
 	fi
 
 	echo "$i"
-	cp $i /home/$USER/.local/share/nautilus/scripts/
-	chmod +x /home/$USER/.local/share/nautilus/scripts/$i
+	filename=$(basename "$i")
+	cp $i /home/$USER/.local/share/nautilus/scripts/$filename
+	chmod +x /home/$USER/.local/share/nautilus/scripts/$filename
 
 done
-echo "Libs installieren..."
-sudo apt-get install \
-lame mp3val libid3-tools mp3gain mp3info sox libav-tools libsox-fmt-mp3 \
-curl gawk links libtranslate-bin
+echo "Install Libs..."
+if [ $UID -eq 0 ] ; then
+	sudo apt-get install \
+	lame mp3val libid3-tools mp3gain mp3info sox libav-tools libsox-fmt-mp3 \
+	curl gawk links libtranslate-bin
+else
+	echo "You are not Admin, Install of Libs uncompleted..."
+fi
 
 # nautius reset
 nautilus -q
