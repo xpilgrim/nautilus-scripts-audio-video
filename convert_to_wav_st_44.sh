@@ -40,7 +40,7 @@ report "towav"
 	# echo and progress will pulsate
 	echo "10"
 	echo "# Konvertierung in wav...\n$filename"
-	message=$(avconv -y -i "$file" -acodec pcm_s16le -ac 2 -ar 44100 ${file%%.*}.wav 2>&1 && echo "Ohne_Fehler_beendet")
+	message=$(avconv -y -i "$file" -acodec pcm_s16le -ac 2 -ar 44100 "${file%%.*}.wav" 2>&1 && echo "Ohne_Fehler_beendet")
 	# remove all characters right from 'O'
 	error=${message##*O}
 	if [ "$error" != "hne_Fehler_beendet" ]
