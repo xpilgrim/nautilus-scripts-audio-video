@@ -53,7 +53,7 @@ report "wavtomp3"
 		zenity --error --text="Ausgewählte Datei ist keine wav-Datei:\n$filename" 
 		exit
 	fi
-	message=$(lame -b 128 -m m -o -S "$file" ${file%%.*}.mp3 2>&1 && echo "Ohne_Fehler_beendet")
+	message=$(lame -b 128 -m m -o -S "$file" "${file%%.*}.mp3" 2>&1 && echo "Ohne_Fehler_beendet")
 	# remove all characters right from 'O'
 	error=${message##*O}
 	if [ "$error" != "hne_Fehler_beendet" ]
