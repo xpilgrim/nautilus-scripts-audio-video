@@ -50,6 +50,7 @@ report "mp3trimmer"
 
 	# check for packages
 	f_check_package "sox"
+	f_check_package "libsox-fmt-mp3"
 	filename=$(basename "$file")
 	extension="${filename##*.}"
 	# echo and progress will pulsate
