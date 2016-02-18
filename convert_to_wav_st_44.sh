@@ -29,13 +29,17 @@ function f_check_package () {
 	fi
 }
 
-echo -n "${NAUTILUS_SCRIPT_SELECTED_FILE_PATHS}" | while read file ; do
 
+# check for packages
+f_check_package "libav-tools"
+
+# this works not properly if multible files are selected
+#echo -n "${NAUTILUS_SCRIPT_SELECTED_FILE_PATHS}" | while read file ; do
+# so we use this loop
+
+for file in "$@"; do
 report "towav"
 (
-
-	# check for packages
-	f_check_package "libav-tools"
 	filename=$(basename "$file")
 	# echo and progress will pulsate
 	echo "10"
