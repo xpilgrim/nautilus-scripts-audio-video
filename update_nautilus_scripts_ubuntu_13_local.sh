@@ -20,12 +20,25 @@ echo "Nautilus-Scripts aktualisieren..."
 for i in *.sh
 do
    :
-	if [ "$i" != "update_nautilus_scripts_ubuntu_13_local.sh" ] 
-		then	
-		echo "$i"
-		cp $i /home/$USER/.local/share/nautilus/scripts/
-		chmod +x /home/$USER/.local/share/nautilus/scripts/$i
+	if [ "$i" == "install_nautilus_scripts_ubuntu_13_local.sh" ] 
+		then
+		continue
 	fi
+	if [ "$i" == "update_nautilus_scripts.sh" ] 
+		then
+		continue
+	fi
+	if [ "$i" == "update_nautilus_scripts_ubuntu_13_local.sh" ] 
+		then
+		continue
+	fi
+
+	echo "$i"
+	# keep off extentions
+	filename=$(basename "$i")
+	filename="${filename%.*}"
+	cp $i /home/$USER/.local/share/nautilus/scripts/$filename
+	chmod +x /home/$USER/.local/share/nautilus/scripts/$filename
 done
 
 echo "finito"
