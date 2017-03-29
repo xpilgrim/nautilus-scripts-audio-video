@@ -55,7 +55,7 @@ report "normalizer"
 	path_source=$(dirname "$file")
 	file_path_orig="$path_source/original/$filename"
 	cp "$file" "$file_path_orig"
-	echo "# Stille entfernen bei\n$filename"
+	echo "# Normalisieren von\n$filename"
 	meldung=$(sox "$file_path_orig" --norm=-2 "$file" 2>&1 && echo "Ohne_Fehler_beendet")
 	# alle zeichen von rechts nach dem 'O' fuer fehleranalyse extrahieren
 	error=${meldung##*O}
