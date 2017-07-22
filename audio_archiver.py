@@ -8,8 +8,12 @@ Autor: Joerg Sorge
 
 Distributed under the terms of GNU GPL version 2 or later
 Copyright (C) Joerg Sorge joergsorge at ggooogl
-2011-09-26
+2017-07-18
 
+Depends on:
+    Tkinter, sox, mp3gain, python-mutagen
+Install with:
+    sudo apt-get install python-tk sox mp3gain python-mutagen
 """
 
 from Tkinter import Frame, END
@@ -21,6 +25,9 @@ import subprocess
 import string
 import re
 import datetime
+from mutagen.id3 import ID3, TPE1, TIT2
+from mutagen.id3 import ID3NoHeaderError
+from mutagen.apev2 import APEv2
 
 
 class app_config(object):
@@ -199,6 +206,58 @@ def trim_silence(self, mp3_file, dir_mod):
     self.display_logging("\ntrimmed silence:")
 
 
+def read_id3_tag():
+    """read_id3_tag"""
+    try:
+    mp3_meta = ID3(mp3_file)
+    tags = mp3_meta.pprint().splitlines()
+    print tags
+
+    for tag in tags:
+        print tag
+        if tag[:4] == "TIT2":
+            title = tag[5:]
+            print title
+        if tag[:4] == "TPE1":
+            author = tag[5:]
+            print author
+    mp3_meta.delete()
+    ape_meta = APEv2(mp3_file)
+    ape_meta.delete()
+    mp3_meta.add(TPE1(encoding=3, text=author))
+    mp3_meta.add(TIT2(encoding=3, text=title))
+    mp3_meta.save()
+
+except ID3NoHeaderError:
+    print "nix"
+
+
+def delete_id3tag_v1(self, mp3_file):
+    """delete id3v1 to prevent wrong characters there"""
+#TODO: catch if no tag present
+
+    tag_with_non_ascii = None
+    audio = ID3(mp3_file)
+    tags = audio.pprint().splitlines()
+    # check for non ascii characters
+    for tag in tags:
+        maxord = max(ord(char) for char in tag)
+        if maxord > 128:
+            # found non ascii
+            self.display_logging("Non ASCII: " + tag.encode("utf-8"))
+            tag_with_non_ascii = True
+        else:
+            self.display_logging("ASCII:" + tag)
+
+    #self.display_logging("audio")
+
+    try:
+        audio.delete(delete_v2=False)
+        self.display_logging("ID3v1 deleted while containing non ascii characters...")
+    except Exception, e:
+            self.display_logging("Error: %s" % str(e))
+
+
 class my_form(Frame):
     """Form"""
     def __init__(self, master=None):
@@ -257,12 +316,18 @@ class my_form(Frame):
             self.display_logging(extract_filename(item))
             #self.display_logging(item)
 
+        # ID3
+        self.display_logging("\nID3Tags editing, this will be fast...")
+        for item in mp3_filenames_mod:
+            delete_id3tag_v1(self, item)
+            self.display_logging(extract_filename(item))
+
         # remove dir_temp
-        try:
-            shutil.rmtree(dir_temp)
-            self.display_logging("\nTemp Directory removed...")
-        except Exception, e:
-            self.display_logging("Error: %s" % str(e))
+        #try:
+        #    shutil.rmtree(dir_temp)
+        #    self.display_logging("\nTemp Directory removed...")
+        #except Exception, e:
+        #    self.display_logging("Error: %s" % str(e))
 
 if __name__ == "__main__":
     print "audio archiver started"
