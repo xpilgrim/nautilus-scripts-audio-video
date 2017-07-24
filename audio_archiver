@@ -214,7 +214,7 @@ def trim_silence(self, mp3_file_temp, dir_mod):
     except Exception, e:
         self.display_logging("Error: %s" % str(e))
         return None
-    self.display_logging("mp3")
+
     try:
         audio = MP3(mp3_file_mod)
         mp3_length_trimmed = audio.info.length
