@@ -10,9 +10,19 @@ Distributed under the terms of GNU GPL version 2 or later
 Copyright (C) Joerg Sorge joergsorge at ggooogl
 2017-07-18
 
+This script is a so called "nautilus script".
+Therfore it has no extention.
+
+This script performs the follow actions on the selected files:
+    - Backup the unchanged files in the subfolder ...orig
+    - Rename filenames with non-asccii characters
+    - Trim silence on the beginning and the end of a mp3
+    - Reduce ID3V2-Tags to author an title, remove ID3V1 Tags, write ID3V2.4
+    - register mp3Gain in the APE-Tag
+
 Depends on:
-    Tkinter, sox, mp3gain, python-mutagen
-Install with:
+    Python, Tkinter, sox, mp3gain, python-mutagen
+Install additional packages with:
     sudo apt-get install python-tk sox mp3gain python-mutagen
 """
 
