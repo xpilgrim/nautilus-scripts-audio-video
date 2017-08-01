@@ -15,6 +15,7 @@ This script is a so called "nautilus script".
 This script performs the follow actions on the selected files:
     - Backup the unchanged files in the subfolder ...orig
     - Rename filenames with non-asccii characters
+    - Check for at least bitrate according to app_mp3_bitrate value
     - Trim silence on the beginning and the end of a mp3
     - Reduce ID3V2-Tags to author an title, remove ID3V1 Tags, write ID3V2.4
     - register mp3Gain in the APE-Tag
@@ -47,6 +48,9 @@ class app_config(object):
         """Settings"""
         # app_config
         self.app_desc = u"Audio Archiver"
+        self.app_mp3_bitrate = 192
+        self.log_message_summary_bitrate = []
+        self.log_message_summary_id3tag = []
         # for normal usage set to no!!!!!!
         self.app_windows = "no"
         self.app_errorfile = "error_audio_archiver.log"
@@ -169,9 +173,11 @@ def check_and_mod_filenames(self, mp3_files):
 def mp3gain(self, mp3_file):
     """mp3-gain"""
     print u"mp3-File Gainanpassung"
+    self.display_logging("\nmp3gain for: ", None)
+    self.display_logging(extract_filename(mp3_file), None)
     # start subprocess
     try:
-        subprocess.Popen(["mp3gain", "-r", mp3_file],
+        p = subprocess.Popen(["mp3gain", "-r", mp3_file],
                 stdout=subprocess.PIPE, stderr=subprocess.PIPE).communicate()
     except Exception, e:
         self.display_logging("Error: %s" % str(e), "r")
@@ -179,15 +185,14 @@ def mp3gain(self, mp3_file):
         return None
 
     # search for success msg, if not found: -1
-    #mp3gain_output = string.find(p[1], "98%")
+    mp3gain_no_file = string.find(p[1], "Can't open")
     #mp3gain_output_2 = string.find(p[1], "99%")
     #mp3gain_output_1 = string.find(p[1], "written")
-    #self.display_logging(p[1])
+    #self.display_logging(p[1], None)
     #self.display_logging(mp3gain_output_1)
     # wenn gefunden, position, sonst -1
-    #if (mp3gain_output != -1 and mp3gain_output_1 != -1
-    #and mp3gain_output_2 != -1):
-    self.display_logging("\nmp3gain for: ", None)
+    if mp3gain_no_file != -1:
+        self.display_logging("File skipped...", "r")
 
 
 def trim_silence(self, mp3_file_temp, dir_mod):
@@ -205,6 +210,17 @@ def trim_silence(self, mp3_file_temp, dir_mod):
     try:
         audio = MP3(mp3_file_temp)
         mp3_length = audio.info.length
+        mp3_bitrate = audio.info.bitrate / 1000
+    except Exception, e:
+        self.display_logging("Error: %s" % str(e), "r")
+
+    try:
+        if mp3_bitrate < ac.app_mp3_bitrate:
+            self.display_logging("Bitrate to low, file will be skipped...",
+                                                "r")
+            ac.log_message_summary_bitrate.append(
+                                extract_filename(mp3_file_temp))
+            return None
     except Exception, e:
         self.display_logging("Error: %s" % str(e), "r")
 
@@ -265,6 +281,8 @@ def save_id3_tags(self, mp3_file):
 
     except ID3NoHeaderError:
         self.display_logging("No ID3V2 tag present...", "r")
+        ac.log_message_summary_id3tag.append(
+                                extract_filename(mp3_file))
     return author, title
 
 
@@ -306,7 +324,7 @@ class my_form(Frame):
         self.textBox.tag_config("b", foreground="blue")
         self.textBox.tag_config("r", foreground="red")
         self.textBox.insert(END,
-        "Work on audio files, this can take a while, take a cup of coffee...\n")
+        "Working on audio files, this can take a while, enjoy a cup of coffee...\n")
 
         # registering callback
         self.listenID = self.after(400, self.lets_rock)
@@ -356,7 +374,7 @@ class my_form(Frame):
         self.display_logging("\nmp3Gain, this can take a while...", None)
         for item in mp3_filenames_mod:
             mp3gain(self, item)
-            self.display_logging(extract_filename(item), None)
+            #self.display_logging(extract_filename(item), None)
             #self.display_logging(item)
 
         # ID3
@@ -380,6 +398,27 @@ class my_form(Frame):
             self.display_logging("\nMod Directory removed...", None)
         except Exception, e:
             self.display_logging("Error: %s" % str(e), "r")
+
+        # display summary if necessary
+        if (len(ac.log_message_summary_bitrate) != 0
+            or len(ac.log_message_summary_id3tag) != 0):
+                self.display_logging(
+                        "\nPlease take care about the following issues!",
+                        "b")
+
+        if len(ac.log_message_summary_bitrate) != 0:
+            self.display_logging(
+            "This files are not editable, while they have to low bitrate:",
+            "r")
+            for item in ac.log_message_summary_bitrate:
+                self.display_logging(item, None)
+
+        if len(ac.log_message_summary_id3tag) != 0:
+            self.display_logging(
+            "\nThis files hasn't ID3 Tags Version 2, please use an ID3-Tagger:",
+                                    "r")
+            for item in ac.log_message_summary_id3tag:
+                self.display_logging(item, None)
 
         self.display_logging(
             "\nNow we are finished, I hope the coffee was fine?", None)
