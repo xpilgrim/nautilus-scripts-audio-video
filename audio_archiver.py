@@ -109,9 +109,11 @@ def check_and_mod_filenames(self, mp3_files):
     mp3_files_temp = []
     mp3_files_mod = []
     self.display_logging("\nOriginal files will be saved in:", None)
-    #self.display_logging(datetime.datetime.now().strftime("%Y_%m_%d_%H_%M_%S"))
-    dir_orig = (os.path.dirname(mp3_files[0]) + "/audio_archiver_"
-            + datetime.datetime.now().strftime("%Y_%m_%d_%H_%M_%S") + "_orig")
+    #dir_orig = (os.path.dirname(mp3_files[0]) + "/audio_archiver_"
+    # take the tail of filepath in the name of backup dir
+    dir_orig = (os.path.dirname(mp3_files[0]) + "/"
+        + os.path.basename(os.path.dirname(mp3_files[0])) + "_"
+        + datetime.datetime.now().strftime("%Y_%m_%d_%H_%M_%S") + "_original")
     self.display_logging(dir_orig, None)
 
     self.display_logging("\nTemp files will be saved in:", None)
@@ -135,8 +137,8 @@ def check_and_mod_filenames(self, mp3_files):
     # backup in orig
     for item in mp3_files:
         file_destination = dir_orig + "/" + extract_filename(item)
-        #self.display_logging(extract_filename(item) + "\n")
         try:
+            #self.display_logging(item + "\n", None)
             shutil.copy(item, file_destination)
         except Exception, e:
             self.display_logging("Error: %s" % str(e), "r")
@@ -346,8 +348,18 @@ class my_form(Frame):
                 os.environ['NAUTILUS_SCRIPT_SELECTED_FILE_PATHS'].splitlines())
         except Exception, e:
             self.display_logging("Error: %s" % str(e), "r")
-        self.display_logging("\nDirectory to work in:", None)
+
         workin_path = os.path.dirname(path_files[0])
+        for char in workin_path:
+            if ord(char) > 128:
+                self.display_logging(
+                    "\nThe filepath contains non ASCII charakters. "
+                    + "Sorry, until now, we can not proceed here. "
+                    + "But you can rename the filepath an try again..",
+                                    "r")
+                return
+
+        self.display_logging("\nDirectory to work in:", None)
         self.display_logging(os.path.dirname(path_files[0]), None)
         self.display_logging("\nFiles to work on:", None)
         mp3_files = []
