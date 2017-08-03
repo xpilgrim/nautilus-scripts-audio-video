@@ -155,9 +155,20 @@ def check_and_mod_filenames(self, mp3_files):
             self.display_logging("\nModified filename:", None)
             self.display_logging(filename_mod, "b")
 
+        self.display_logging(item, "b")
         # concatenate path and filename
-        path_file_temp = dir_temp + "/" + filename_mod
-        path_file_mod = dir_mod + "/" + filename_mod
+        try:
+            # decode needed for pathnames with non ascii
+            path_file_temp = (dir_temp.decode(sys.getfilesystemencoding())
+                                    + "/" + filename_mod)
+            self.display_logging(path_file_temp, "b")
+        except Exception, e:
+            self.display_logging("Error: %s" % str(e), "r")
+
+        # decode needed for pathnames with non ascii
+        path_file_mod = (dir_mod.decode(sys.getfilesystemencoding())
+                                        + "/" + filename_mod)
+
         # move in temp
         try:
             #for production, change from copy to move
@@ -227,7 +238,9 @@ def trim_silence(self, mp3_file_temp, dir_mod):
         self.display_logging("Error: %s" % str(e), "r")
 
     author, title = save_id3_tags(self, mp3_file_temp)
-    mp3_file_mod = dir_mod + "/" + extract_filename(mp3_file_temp)
+    # decode needed for pathnames with non ascii
+    mp3_file_mod = (dir_mod.decode(sys.getfilesystemencoding())
+                            + "/" + extract_filename(mp3_file_temp))
     #self.display_logging(mp3_file)
     #self.display_logging(mp3_file_mod)
     #sox "$file_path_orig" -C 192.2 "$file" silence 1 0.1 1% reverse
@@ -350,14 +363,14 @@ class my_form(Frame):
             self.display_logging("Error: %s" % str(e), "r")
 
         workin_path = os.path.dirname(path_files[0])
-        for char in workin_path:
-            if ord(char) > 128:
-                self.display_logging(
-                    "\nThe filepath contains non ASCII charakters. "
-                    + "Sorry, until now, we can not proceed here. "
-                    + "But you can rename the filepath an try again..",
-                                    "r")
-                return
+        #for char in workin_path:
+        #    if ord(char) > 128:
+        #        self.display_logging(
+        #            "\nThe filepath contains non ASCII charakters. "
+        #            + "Sorry, until now, we can not proceed here. "
+        #            + "But you can rename the filepath an try again..",
+        #                            "r")
+        #        return
 
         self.display_logging("\nDirectory to work in:", None)
         self.display_logging(os.path.dirname(path_files[0]), None)
@@ -376,7 +389,7 @@ class my_form(Frame):
         # filename hack
         mp3_filenames_temp, mp3_filenames_mod, dir_temp, dir_mod = (
                             check_and_mod_filenames(self, mp3_files))
-
+        #return
         # trim silence, save tags
         self.display_logging("\nTrim silence, this can take a while...", None)
         for item in mp3_filenames_temp:
