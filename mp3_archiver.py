@@ -17,7 +17,7 @@ This script performs the follow actions on the selected files:
     - Rename filenames with non-asccii characters
     - Check for at least bitrate according to app_mp3_bitrate value
     - Trim silence on the beginning and the end of a mp3
-    - Reduce ID3V2-Tags to author an title, remove ID3V1 Tags, write ID3V2.4
+    - Reduce ID3V2-Tags to author and title, remove ID3V1 Tags, write ID3V2.4
     - register mp3Gain in the APE-Tag
 
 Depends on:
@@ -48,7 +48,13 @@ class app_config(object):
         """Settings"""
         # app_config
         self.app_desc = u"Audio Archiver"
+        # Bitrate for mp3 (192, 256 or 320) in kBit/s
         self.app_mp3_bitrate = 192
+        # Lame mp3 encoding quality level from 0 to 9
+        # if you want to set the quality to the highest level (value 0),
+        # you must use 99 instead,
+        # see the man soxformat option -C for the reason!
+        self.app_mp3_encode_quality = 2
         self.log_message_summary_bitrate = []
         self.log_message_summary_id3tag = []
         # for normal usage set to no!!!!!!
@@ -155,13 +161,13 @@ def check_and_mod_filenames(self, mp3_files):
             self.display_logging("\nModified filename:", None)
             self.display_logging(filename_mod, "b")
 
-        self.display_logging(item, "b")
+        #self.display_logging(item, "b")
         # concatenate path and filename
         try:
             # decode needed for pathnames with non ascii
             path_file_temp = (dir_temp.decode(sys.getfilesystemencoding())
                                     + "/" + filename_mod)
-            self.display_logging(path_file_temp, "b")
+            #self.display_logging(path_file_temp, "b")
         except Exception, e:
             self.display_logging("Error: %s" % str(e), "r")
 
@@ -245,11 +251,15 @@ def trim_silence(self, mp3_file_temp, dir_mod):
     #self.display_logging(mp3_file_mod)
     #sox "$file_path_orig" -C 192.2 "$file" silence 1 0.1 1% reverse
     #silence 1 0.1 1% reverse
+    compression_and_quality = (str(ac.app_mp3_bitrate) + "."
+                                + str(ac.app_mp3_encode_quality))
     # start subprocess
     try:
-        subprocess.Popen(["sox", mp3_file_temp, "-C", "192.2", mp3_file_mod,
-        "silence", "1", "0.1", "1%", "reverse",
-        "silence", "1", "0.1", "1%", "reverse"],
+        #subprocess.Popen(["sox", mp3_file_temp, "-C", "192.2", mp3_file_mod,
+        subprocess.Popen(["sox", mp3_file_temp,
+            "-C", compression_and_quality, mp3_file_mod,
+            "silence", "1", "0.1", "1%", "reverse",
+            "silence", "1", "0.1", "1%", "reverse"],
                 stdout=subprocess.PIPE, stderr=subprocess.PIPE).communicate()
     except Exception, e:
         self.display_logging("Error: %s" % str(e), "r")
@@ -355,7 +365,44 @@ class my_form(Frame):
     def lets_rock(self):
         """man funktion"""
         print "lets rock"
-        #log_data = None
+        # check options
+        mp3_bitrate_options = [192, 256, 320]
+        mp3_bitrate_option_valid = None
+
+        for b in mp3_bitrate_options:
+            if ac.app_mp3_bitrate == b:
+                mp3_bitrate_option_valid = True
+
+        if mp3_bitrate_option_valid is None:
+            self.display_logging(
+                    "\nThe current bitrate is set to a wrong value: "
+                    + str(ac.app_mp3_bitrate),
+                                    "r")
+            self.display_logging(
+                    "The bitrate option must be 192, 256 or 320! "
+                    + "Please correct your entry in: app_mp3_bitrate",
+                                    None)
+            return
+
+        mp3_encode_quality_options = [99, 1, 2, 3, 4, 5, 6]
+        mp3_encode_quality_option_valid = None
+
+        for b in mp3_encode_quality_options:
+            if ac.app_mp3_encode_quality == b:
+                mp3_encode_quality_option_valid = True
+
+        if mp3_encode_quality_option_valid is None:
+            self.display_logging(
+                    "\nThe current encode quality is set to a wrong value: "
+                    + str(ac.app_mp3_encode_quality),
+                                    "r")
+            self.display_logging(
+                    "The encode quality option must be 99 for best quality, "
+                    + "or a value between 1 and 6, higher is lower quality! "
+                    + "Please correct your entry in: app_mp3_encode_quality",
+                                    None)
+            return
+
         try:
             path_files = (
                 os.environ['NAUTILUS_SCRIPT_SELECTED_FILE_PATHS'].splitlines())
