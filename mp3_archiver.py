@@ -26,20 +26,44 @@ Install additional packages with:
     sudo apt-get install python-tk python-mutagen sox mp3gain easytag
 """
 
-from Tkinter import Button, Frame, END
-from ScrolledText import ScrolledText
 import os
-import shutil
 import sys
 import subprocess
+from ScrolledText import ScrolledText
+import shutil
 import string
 import re
 import datetime
 import math
-from mutagen.id3 import ID3, TPE1, TIT2
-from mutagen.id3 import ID3NoHeaderError
-from mutagen.apev2 import APEv2
-from mutagen.mp3 import MP3
+#from Tkinter import Button, Frame, END
+try:
+    from Tkinter import Button, Frame, END
+except ImportError:
+    print "ImportError Tkinter"
+    try:
+        message = ("ImportError Tkinter!\nPlease install it with:\n"
+                + "sudo apt-get install python-tk")
+        subprocess.Popen(["zenity", "--info", "--text", message],
+                stdout=subprocess.PIPE, stderr=subprocess.PIPE).communicate()
+    except Exception, e:
+        print e
+    sys.exit()
+
+try:
+    from mutagen.id3 import ID3, TPE1, TIT2
+    from mutagen.id3 import ID3NoHeaderError
+    from mutagen.apev2 import APEv2
+    from mutagen.mp3 import MP3
+except ImportError:
+    print "ImportError mutagen"
+    try:
+        message = ("ImportError mutagen!\nPlease install it with:\n"
+                + "sudo apt-get install python-mutagen")
+        subprocess.Popen(["zenity", "--info", "--text", message],
+                stdout=subprocess.PIPE, stderr=subprocess.PIPE).communicate()
+    except Exception, e:
+        print e
+    sys.exit()
 
 
 class app_config(object):
@@ -60,6 +84,28 @@ class app_config(object):
         # for normal usage set to no!!!!!!
         self.app_windows = "no"
         self.app_errorfile = "error_audio_archiver.log"
+
+
+def check_packages(self, package_list):
+    """check_packages"""
+    try:
+        for package in package_list:
+            print package
+            p = subprocess.Popen(["dpkg-query", "-s", package,
+                "2>/dev/null|grep"],
+                stdout=subprocess.PIPE, stderr=subprocess.PIPE).communicate()
+            #print p
+            #print string.find(p[0], "installed")
+            if string.find(p[0], "installed") == -1:
+                message = ("Missing package " + package
+                                + "!\nPlease install it with:\n"
+                                + "sudo apt-get install " + package)
+                self.display_logging(message, "r")
+                return None
+    except Exception, e:
+        self.display_logging("Error: %s" % str(e), "r")
+        return None
+    return True
 
 
 def extract_filename(path_filename):
@@ -380,6 +426,11 @@ class my_form(Frame):
     def lets_rock(self):
         """man funktion"""
         print "lets rock"
+        # check packages
+        check_package = True
+        check_package = check_packages(self, ["sox", "mp3gain", "easytag"])
+        if check_package is None:
+            return
         # check options
         mp3_bitrate_options = [192, 256, 320]
         mp3_bitrate_option_valid = None
@@ -423,6 +474,9 @@ class my_form(Frame):
                 os.environ['NAUTILUS_SCRIPT_SELECTED_FILE_PATHS'].splitlines())
         except Exception, e:
             self.display_logging("Error: %s" % str(e), "r")
+            self.display_logging("This is a nautilus script "
+                + "that need one or more selected files for working on", None)
+            return
 
         workin_path = os.path.dirname(path_files[0])
         ac.app_workin_path = os.path.dirname(path_files[0])
@@ -517,6 +571,7 @@ class my_form(Frame):
 
 if __name__ == "__main__":
     print "audio archiver started"
+    #check_libs()
     ac = app_config()
     mything = my_form()
     mything.master.title("Audio Archiver")
