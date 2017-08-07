@@ -21,12 +21,12 @@ This script performs the follow actions on the selected files:
     - register mp3Gain in the APE-Tag
 
 Depends on:
-    Python, Tkinter, sox, mp3gain, python-mutagen
+    Python, Tkinter, python-mutagen, sox, mp3gain, easytag
 Install additional packages with:
-    sudo apt-get install python-tk sox mp3gain python-mutagen
+    sudo apt-get install python-tk python-mutagen sox mp3gain easytag
 """
 
-from Tkinter import Frame, END
+from Tkinter import Button, Frame, END
 from ScrolledText import ScrolledText
 import os
 import shutil
@@ -349,7 +349,11 @@ class my_form(Frame):
         self.textBox.tag_config("b", foreground="blue")
         self.textBox.tag_config("r", foreground="red")
         self.textBox.insert(END,
-        "Working on audio files, this can take a while, enjoy a cup of coffee...\n")
+                "Working, this can take a while, enjoy a cup of coffee...\n")
+        self.pressButton = Button(self,
+                text="ID3 easyTAG Editor", command=self.call_id3_editor)
+        # the button will appear when finished
+        #self.pressButton.pack()
 
         # registering callback
         self.listenID = self.after(400, self.lets_rock)
@@ -361,6 +365,17 @@ class my_form(Frame):
             self.textBox.insert(END, log_message + "\n")
         else:
             self.textBox.insert(END, log_message + "\n", text_format)
+
+    def call_id3_editor(self):
+        self.textBox.insert(END, "Click" + "\n")
+        # start subprocess
+        try:
+            subprocess.Popen(["easytag", ac.app_workin_path],
+                stdout=subprocess.PIPE, stderr=subprocess.PIPE).communicate()
+        except Exception, e:
+            self.display_logging("Error: %s" % str(e), "r")
+
+        return None
 
     def lets_rock(self):
         """man funktion"""
@@ -410,6 +425,7 @@ class my_form(Frame):
             self.display_logging("Error: %s" % str(e), "r")
 
         workin_path = os.path.dirname(path_files[0])
+        ac.app_workin_path = os.path.dirname(path_files[0])
         #for char in workin_path:
         #    if ord(char) > 128:
         #        self.display_logging(
@@ -494,6 +510,10 @@ class my_form(Frame):
 
         self.display_logging(
             "\nNow we are finished, I hope the coffee was fine?", None)
+
+        # Button for calling easyTAG editor
+        self.pressButton.pack()
+
 
 if __name__ == "__main__":
     print "audio archiver started"
