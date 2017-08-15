@@ -1,9 +1,9 @@
 #!/bin/bash
 
 ## Dieses Skript konvertiert wav-Dateien in mp3
-## lame und mp3gain muss installiert sein: sudo apt-get install lame
+## lame muss installiert sein: sudo apt-get install lame
 #
-# This script convert wav-files to mp3-files
+# This script encodes wav-files to mp3-files
 #
 # Install in ~/.gnome2/nautilus-scripts or ~/Nautilus/scripts
 # You need to be running Nautilus 1.0.3+ to use scripts.
@@ -15,9 +15,9 @@
 # sudo chmod +x /usr/share/nautilus-scripts/wav_to_mp3_m_128.sh
 # sudo ln -s /usr/share/nautilus-scripts/wav_to_mp3_m_128.sh ~/.gnome2/nautilus-scripts/wav_to_mp3_m_128
 #
-# dependent on: lame, mp3gain
+# dependents on: lame
 # if not alraedy on your system, type for example:
-# sudo apt-get install mp3gain
+# sudo apt-get install lame
 #
 # Author: Joerg Sorge
 # Distributed under the terms of GNU GPL version 2 or later
@@ -40,29 +40,30 @@ report "wavtomp3"
 (
 
 	# check for packages
-	f_check_package "mp3gain"
 	f_check_package "lame"
 
 	filename=$(basename "$file")
 	extension="${filename##*.}"
 	# echo and progress will pulsate
 	echo "10"
-	echo "# Konvertierung in mp3...\n$filename"
+	echo "# Encode to mp3...\n$filename"
 	
 	if [ "$extension" != "wav" ] && [ "$extension" != "WAV" ]; then
-		zenity --error --text="Ausgewählte Datei ist keine wav-Datei:\n$filename" 
+		zenity --error --text="It's not a wav file:\n$filename" 
 		exit
 	fi
-	message=$(lame -b 128 -m m -o -S "$file" "${file%%.*}.mp3" 2>&1 && echo "Ohne_Fehler_beendet")
-	# remove all characters right from 'O'
-	error=${message##*O}
-	if [ "$error" != "hne_Fehler_beendet" ]
+
+	# set --noreplaygain to prevent lame writing the replaygain tag
+	message=$(lame -b 128 -m m -o -S --noreplaygain "$file" "${file%%.*}.mp3" 2>&1 && echo "Success")
+	# remove all characters right from 'S'
+	error=${message##*S}
+	if [ "$error" != "uccess" ]
 		then
-		echo "$message" | zenity --title="mp3-Konvertierungs-Fehler " --text-info --width=500 --height=200
+		echo "$message" | zenity --title="Error by encoding to mp3 " --text-info --width=500 --height=200
 	fi
 
 ) | zenity --progress \
-           --title="wav to mp3: Datei bearbeiten" --text="..." --width=500 --pulsate --auto-close
+           --title="wav to mp3: Work on files" --text="..." --width=500 --pulsate --auto-close
 
 if [ "$?" = -1 ] ; then
 	zenity --error --text="Bearbeitung abgebrochen"
