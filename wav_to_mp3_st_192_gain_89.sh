@@ -3,7 +3,7 @@
 ## Dieses Skript konvertiert wav-Dateien in mp3 und passt die Lautheit mit mp3gain an
 ## lame und mp3gain muss installiert sein: sudo apt-get install lame/ sudo apt-get install mp3gain
 #
-# This script convert wav-files to mp3-files, analyses the mp3-gain and write the mp3gain-tag.
+# This script convert wav-files to mp3-files, analyses the mp3-gain and writes the mp3gain-tag.
 #
 # Install in ~/.gnome2/nautilus-scripts or ~/Nautilus/scripts
 # You need to be running Nautilus 1.0.3+ to use scripts.
@@ -46,34 +46,37 @@ report "wavtomp3gain"
 	extension="${filename##*.}"
 	# echo and progress will pulsate
 	echo "10"
-	echo "# Konvertierung in mp3...\n$filename"
+	echo "# Encode to mp3...\n$filename"
 	
 	if [ "$extension" != "wav" ] && [ "$extension" != "WAV" ]; then
-		zenity --error --text="Ausgewählte Datei ist keine wav-Datei:\n$filename" 
+		zenity --error --text="It's not a wav file:\n$filename" 
 		exit
 	fi
-	message=$(lame -b 192 -m s -o -S "$file" "${file%%.*}.mp3" 2>&1 && echo "Ohne_Fehler_beendet")
-	# remove all characters right from 'O'
-	error=${message##*O}
-	if [ "$error" != "hne_Fehler_beendet" ]
+	# set --noreplaygain to prevent lame writing the replaygain tag
+	message=$(lame -b 192 -m s -o -S --noreplaygain "$file" "${file%%.*}.mp3" 2>&1 && echo "Success")
+	#message=$(lame -b 192 -m s -o -S "$file" "${file%%.*}.mp3" 2>&1 && echo "Success")
+	# remove all characters right from 'S'
+	error=${message##*S}
+	if [ "$error" != "uccess" ]
 		then
-		echo "$message" | zenity --title="mp3-Konvertierungs-Fehler " --text-info --width=500 --height=200
+		echo "$message" | zenity --title="Error by encoding to mp3 " --text-info --width=500 --height=200
 	fi
 
-	echo "# mp3Gain-Anpassung...\n${filename%%.*}.mp3"
-	message=$(mp3gain -r "${file%%.*}.mp3" 2>&1 && echo "Ohne_Fehler_beendet")
-	# remove all characters right from 'O'
-	error=${message##*O}
-	if [ "$error" != "hne_Fehler_beendet" ]
+	echo "# mp3Gain...\n${filename%%.*}.mp3"
+	#message=$(mp3gain -r "${file%%.*}.mp3" 2>&1 && echo "Success")
+	message=$(mp3gain "${file%%.*}.mp3" 2>&1 && echo "Success")
+	# remove all characters right from 'S'
+	error=${message##*S}
+	if [ "$error" != "uccess" ]
 		then
-		echo "$message" | zenity --title="mp3Gain-Fehler " --text-info --width=500 --height=200
+		echo "$message" | zenity --title="Error by mp3gain " --text-info --width=500 --height=200
 	fi
 
 ) | zenity --progress \
-           --title="wav to mp3: Datei bearbeiten" --text="..." --width=500 --pulsate --auto-close
+           --title="wav to mp3: Work on files" --text="..." --width=500 --pulsate --auto-close
 
 if [ "$?" = -1 ] ; then
-	zenity --error --text="Bearbeitung abgebrochen"
+	zenity --error --text="Canceled"
 fi
 done
 exit
