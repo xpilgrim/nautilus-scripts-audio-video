@@ -503,6 +503,14 @@ class my_form(Frame):
         #        print p
         #        self.display_logging(p, "")
 
+        # check for mp3 files
+        if len(mp3_files) == 0:
+            self.display_logging("No mp3 files found...", "r")
+            self.display_logging(
+            "\nNow we are finished, "
+            + "sorry, I think it was not enough time for coffee...", None)
+            return
+
         # filename hack
         mp3_filenames_temp, mp3_filenames_mod, dir_temp, dir_mod = (
                             check_and_mod_filenames(self, mp3_files))
