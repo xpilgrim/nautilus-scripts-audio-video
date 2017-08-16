@@ -30,7 +30,7 @@ function f_choose_msg_lang () {
 		msg[1]="installed"
 		msg[2]="Encode to mp3..."
 		msg[3]="Calculate replayGain..."
-		msg[4]="wav to mp3: Work on files..."
+		msg[4]="wav to mp3: work on files..."
 		msg[5]="Canceled..."
 
 		err[1]=" not installed, work not possible."
@@ -41,7 +41,7 @@ function f_choose_msg_lang () {
 		msg[1]="installiert"
 		msg[2]="Enkodieren zu mp3..."
 		msg[3]="replayGain berechnen..."
-		msg[4]="wav to mp3: Bearbeite Dateien..."
+		msg[4]="wav zu mp3: Bearbeite Dateien..."
 		msg[5]="Abgebrochen..."
 
 		err[1]=" ist nicht installiert, Bearbeitung nicht moeglich."
@@ -62,16 +62,16 @@ function f_check_package () {
 	fi
 }
 
+# switch lang
+f_choose_msg_lang
+# check for packages
+f_check_package "mp3gain"
+f_check_package "lame"
 
 echo -n "${NAUTILUS_SCRIPT_SELECTED_FILE_PATHS}" | while read file ; do
 
 report "wavtomp3gain"
 (
-	# switch lang
-	f_choose_msg_lang
-	# check for packages
-	f_check_package "mp3gain"
-	f_check_package "lame"
 	filename=$(basename "$file")
 	extension="${filename##*.}"
 	# echo and progress will pulsate
@@ -82,6 +82,7 @@ report "wavtomp3gain"
 		zenity --error --text="${err[2]}\n$filename" 
 		exit
 	fi
+
 	# set --noreplaygain to prevent lame writing the replaygain tag
 	message=$(lame -b 192 -m s -o -S --noreplaygain "$file" "${file%%.*}.mp3" 2>&1 && echo "Success")
 	#message=$(lame -b 192 -m s -o -S "$file" "${file%%.*}.mp3" 2>&1 && echo "Success")
@@ -94,6 +95,8 @@ report "wavtomp3gain"
 	fi
 
 	echo "# ${msg[3]}\n${filename%%.*}.mp3"
+
+	# set -r for hardcoded replaygain with undo data
 	#message=$(mp3gain -r "${file%%.*}.mp3" 2>&1 && echo "Success")
 	message=$(mp3gain "${file%%.*}.mp3" 2>&1 && echo "Success")
 
