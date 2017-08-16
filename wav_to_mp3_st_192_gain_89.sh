@@ -26,18 +26,7 @@
 
 function f_choose_msg_lang () {
 	local_locale=$(locale | grep LANGUAGE | cut -d= -f2 | cut -d_ -f1)
-	if [ $local_locale == "en" ]; then
-		msg[1]="installed"
-		msg[2]="Encode to mp3..."
-		msg[3]="Calculate replayGain..."
-		msg[4]="wav to mp3: work on files..."
-		msg[5]="Canceled..."
-
-		err[1]=" not installed, work not possible."
-		err[2]="It's not a wav file:"
-		err[3]="Error by encoding to mp3 "
-		err[4]="Error by mp3gain"
-	else
+	if [ $local_locale == "de" ]; then
 		msg[1]="installiert"
 		msg[2]="Enkodieren zu mp3..."
 		msg[3]="replayGain berechnen..."
@@ -48,6 +37,17 @@ function f_choose_msg_lang () {
 		err[2]="Das ist keine mp3 Datei:"
 		err[3]="Fehler beim enkodieren"
 		err[4]="Fehler bei mp3gain"
+	else
+		msg[1]="installed"
+		msg[2]="Encode to mp3..."
+		msg[3]="Calculate replayGain..."
+		msg[4]="wav to mp3: work on files..."
+		msg[5]="Canceled..."
+
+		err[1]=" not installed, work not possible."
+		err[2]="It's not a wav file:"
+		err[3]="Error by encoding to mp3 "
+		err[4]="Error by mp3gain"
 	fi
 }
 
