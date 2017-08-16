@@ -84,8 +84,8 @@ report "wavtomp3gain"
 	fi
 
 	# set --noreplaygain to prevent lame writing the replaygain tag
-	message=$(lame -b 192 -m s -o -S --noreplaygain "$file" "${file%%.*}.mp3" 2>&1 && echo "Success")
-	#message=$(lame -b 192 -m s -o -S "$file" "${file%%.*}.mp3" 2>&1 && echo "Success")
+	message=$(lame -b 192 -m j -o -S --noreplaygain "$file" "${file%%.*}.mp3" 2>&1 && echo "Success")
+	#message=$(lame -b 192 -m j -o -S "$file" "${file%%.*}.mp3" 2>&1 && echo "Success")
 
 	# remove all characters right from 'S'
 	error=${message##*S}
