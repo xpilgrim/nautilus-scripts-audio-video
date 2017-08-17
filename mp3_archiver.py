@@ -50,6 +50,7 @@ except ImportError:
     sys.exit()
 
 try:
+    import mutagen
     from mutagen.id3 import ID3, TPE1, TIT2
     from mutagen.id3 import ID3NoHeaderError
     from mutagen.apev2 import APEv2
@@ -81,6 +82,7 @@ class app_config(object):
         self.app_mp3_encode_quality = 2
         self.log_message_summary_bitrate = []
         self.log_message_summary_id3tag = []
+        self.log_message_summary_no_silence = []
         # for normal usage set to no!!!!!!
         self.app_windows = "no"
         self.app_errorfile = "error_audio_archiver.log"
@@ -311,6 +313,7 @@ def trim_silence(self, mp3_file_temp, dir_mod):
         self.display_logging("Error: %s" % str(e), "r")
         return None
 
+    # check if lenght is different between orig and edited file
     try:
         audio = MP3(mp3_file_mod)
         mp3_length_trimmed = audio.info.length
@@ -325,6 +328,8 @@ def trim_silence(self, mp3_file_temp, dir_mod):
         # no change in length, copy audio from orig to mod
         try:
             shutil.copy(mp3_file_temp, mp3_file_mod)
+            ac.log_message_summary_no_silence.append(
+                                extract_filename(mp3_file_temp))
         except Exception, e:
             self.display_logging("Error: %s" % str(e), "r")
 
@@ -360,20 +365,33 @@ def save_id3_tags(self, mp3_file):
 def write_id3_tags(self, mp3_file, author, title):
     """read_id3_tag"""
     if author is None and title is None:
-        return
+        # add empty tags
+        author = "unknown author"
+        title = "unknown title"
+
     #self.display_logging("Write tags...")
     try:
-        try:
-            mp3_meta = ID3(mp3_file)
-            mp3_meta.delete()
-
-            mp3_meta.add(TPE1(encoding=3, text=author))
-            mp3_meta.add(TIT2(encoding=3, text=title))
-            mp3_meta.save()
-        except Exception, e:
-            self.display_logging("Error: %s" % str(e), "r")
+        mp3_meta = ID3(mp3_file)
+        mp3_meta.delete()
+        mp3_meta.add(TPE1(encoding=3, text=author))
+        mp3_meta.add(TIT2(encoding=3, text=title))
+        mp3_meta.save()
     except ID3NoHeaderError:
         self.display_logging("No tag present...", "r")
+        try:
+            mp3_meta = mutagen.File(mp3_file, easy=True)
+            mp3_meta.add_tags()
+            mp3_meta.save()
+
+            try:
+                mp3_meta = ID3(mp3_file)
+                mp3_meta.add(TPE1(encoding=3, text=author))
+                mp3_meta.add(TIT2(encoding=3, text=title))
+                mp3_meta.save()
+            except Exception, e:
+                self.display_logging("%s" % str(e), None)
+        except Exception, e:
+            self.display_logging("Error: %s" % str(e), "r")
 
     try:
         ape_meta = APEv2(mp3_file)
@@ -551,7 +569,8 @@ class my_form(Frame):
 
         # display summary if necessary
         if (len(ac.log_message_summary_bitrate) != 0
-            or len(ac.log_message_summary_id3tag) != 0):
+            or len(ac.log_message_summary_id3tag) != 0
+            or len(ac.log_message_summary_no_silence) != 0):
                 self.display_logging(
                         "\nPlease take care about the following issues!",
                         "b")
@@ -568,6 +587,14 @@ class my_form(Frame):
             "\nThis files hasn't ID3 Tags Version 2, please use an ID3-Tagger:",
                                     "r")
             for item in ac.log_message_summary_id3tag:
+                self.display_logging(item, None)
+
+        if len(ac.log_message_summary_no_silence) != 0:
+            self.display_logging(
+            "\nThis files wasn't trimmed, "
+            + "please analyse manualy lame replaygain, xing header etc.:",
+                                    "r")
+            for item in ac.log_message_summary_no_silence:
                 self.display_logging(item, None)
 
         self.display_logging(
