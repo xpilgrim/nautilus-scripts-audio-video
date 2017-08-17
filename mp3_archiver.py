@@ -83,6 +83,7 @@ class app_config(object):
         self.log_message_summary_bitrate = []
         self.log_message_summary_id3tag = []
         self.log_message_summary_no_silence = []
+        self.log_message_summary_not_moved = None
         # for normal usage set to no!!!!!!
         self.app_windows = "no"
         self.app_errorfile = "error_audio_archiver.log"
@@ -565,6 +566,7 @@ class my_form(Frame):
             shutil.rmtree(dir_mod)
             self.display_logging("\nMod Directory removed...", None)
         except Exception, e:
+            ac.log_message_summary_not_moved = True
             self.display_logging("Error: %s" % str(e), "r")
 
         # display summary if necessary
@@ -592,10 +594,16 @@ class my_form(Frame):
         if len(ac.log_message_summary_no_silence) != 0:
             self.display_logging(
             "\nThis files wasn't trimmed, "
-            + "please analyse manualy lame replaygain, xing header etc.:",
+            + "please analyse manually lame replaygain, xing header etc.:",
                                     "r")
             for item in ac.log_message_summary_no_silence:
                 self.display_logging(item, None)
+
+        if ac.log_message_summary_not_moved is True:
+            self.display_logging(
+            "\nOne or more files couldn't moved out from mod directory, "
+            + "please do it manually!",
+                                    "r")
 
         self.display_logging(
             "\nNow we are finished, I hope the coffee was fine?", None)
