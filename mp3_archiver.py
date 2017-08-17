@@ -609,7 +609,7 @@ class my_form(Frame):
             "\nNow we are finished, I hope the coffee was fine?", None)
 
         # Button for calling easyTAG editor
-        self.pressButton.pack()
+        #self.pressButton.pack()
 
 
 if __name__ == "__main__":
