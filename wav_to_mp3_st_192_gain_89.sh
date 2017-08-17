@@ -34,7 +34,7 @@ function f_choose_msg_lang () {
 		msg[5]="Abgebrochen..."
 
 		err[1]=" ist nicht installiert, Bearbeitung nicht moeglich."
-		err[2]="Das ist keine mp3 Datei:"
+		err[2]="Das ist keine wav Datei:"
 		err[3]="Fehler beim enkodieren"
 		err[4]="Fehler bei mp3gain"
 	else
