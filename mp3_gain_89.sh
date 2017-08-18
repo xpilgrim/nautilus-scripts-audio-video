@@ -25,49 +25,83 @@
 # Copyright (C) Joerg Sorge joergsorge at gmail com
 # 2011-09-01
 
+function f_choose_msg_lang () {
+	local_locale=$(locale | grep LANGUAGE | cut -d= -f2 | cut -d_ -f1)
+	if [ $local_locale == "de" ]; then
+		msg[1]="installiert"
+		msg[2]="replayGain anpassen auf 89 dB SPL..."
+		msg[3]="replayGain berechnen..."
+		msg[4]="replayGain: Bearbeite Dateien..."
+		msg[5]="Abgebrochen..."
+
+		err[1]=" ist nicht installiert, Bearbeitung nicht moeglich."
+		err[2]="Das ist keine wav Datei:"
+		err[3]="Fehler beim enkodieren"
+		err[4]="Fehler bei mp3gain"
+	else
+		msg[1]="installed"
+		msg[2]="Calculate replayGain..."
+		msg[3]="Calculate replayGain..."
+		msg[4]="replayGain: work on files..."
+		msg[5]="Canceled..."
+
+		err[1]=" not installed, work not possible."
+		err[2]="It's not a wav file:"
+		err[3]="Error by replayGain to mp3 "
+		err[4]="Error by mp3gain"
+	fi
+}
+
+
 function f_check_package () {
 	package_install=$1
 	if dpkg-query -s $1 2>/dev/null|grep -q installed; then
-		echo "$package_install installiert"
+		echo "$package_install ${msg[1]}"
 	else
-		zenity --error --text="Paket $package_install ist nicht installiert! Bearbeitung nicht moeglich." 
+		zenity --error --text="$package_install ${err[1]}"
 		exit
 	fi
 }
+
+
+# switch lang
+f_choose_msg_lang
+# check for packages
+f_check_package "mp3gain"
 
 echo -n "${NAUTILUS_SCRIPT_SELECTED_FILE_PATHS}" | while read file ; do
 
 report "mp3gain"
 (
-	# check for packages
-	f_check_package "mp3gain"
-
 	# echo and progress will pulsate
 	echo "10"
 	filename=$(basename "$file")
 	extension="${filename##*.}"
-	echo "# mp3-Gain anpassen auf 89 dB SPL:\n$filename"
+	echo "# ${msg[2]}\n$filename"
 
 	if [ "$extension" != "mp3" ] && [ "$extension" != "MP3" ]; then
-		zenity --error --text="Ausgewählte Datei ist keine mp3-Datei:\n$filename" 
+		zenity --error --text="${err[2]}\n$filename" 
 		exit
-	fi
+	fi	
+
 	# run mp3gain
 	# write result with $(commands) in message
-	message=$(mp3gain -r "$file" 2>&1 && echo "Ohne_Fehler_beendet")
+	# use option -r to "hardcode" repalygain
+	#message=$(mp3gain -r "$file" 2>&1 && echo "Success")
+	message=$(mp3gain "$file" 2>&1 && echo "Success")
 	
-	# remove all characters right from 'O'
-	error=${message##*O}
-	if [ "$error" != "hne_Fehler_beendet" ]
+	# remove all characters right from 'S'
+	error=${message##*S}
+	if [ "$error" != "uccess" ]
 		then
-		echo "$message" | zenity --title="mp3Gain-Fehler " --text-info --width=500 --height=200
+		echo "$message" | zenity --title="${err[4]}" --text-info --width=500 --height=200
 	fi
 
 ) | zenity --progress \
-           --title="mp3-Gain: Datei bearbeiten" --text="Gain anpassen..." --width=500 --pulsate --auto-close
+           --title="${msg[4]}" --text="..." --width=500 --pulsate --auto-close
 
 if [ "$?" = -1 ] ; then
-	zenity --error --text="mp3-Gain: Bearbeitung abgebrochen"
+	zenity --error --text="${msg[5]}"
 fi
 done
 exit
