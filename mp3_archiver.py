@@ -20,10 +20,13 @@ This script performs the follow actions on the selected files:
     - Reduce ID3V2-Tags to author and title, remove ID3V1 Tags, write ID3V2.4
     - register mp3Gain in the APE-Tag
 
+If the file has a bitrate grater then set in app_mp3_bitrate,
+then the file will be recoded. Otherwise a looseless trimm will be done.
+
 Depends on:
-    Python, Tkinter, python-mutagen, sox, mp3gain, easytag
+    Python, Tkinter, python-mutagen, sox, mp3gain, mp3splt, easytag
 Install additional packages with:
-    sudo apt-get install python-tk python-mutagen sox mp3gain easytag
+    sudo apt-get install python-tk python-mutagen sox mp3gain mp3splt easytag
 """
 
 import os
@@ -282,16 +285,13 @@ def trim_silence(self, mp3_file_temp, dir_mod):
     except Exception, e:
         self.display_logging("Error: %s" % str(e), "r")
 
-    try:
-        if mp3_bitrate < ac.app_mp3_bitrate:
-            self.display_logging("Bitrate to low, file will be skipped...",
-                                                "r")
-            ac.log_message_summary_bitrate.append(
+    if mp3_bitrate < ac.app_mp3_bitrate:
+        self.display_logging("Bitrate to low, file will be skipped...", "r")
+        ac.log_message_summary_bitrate.append(
                                 extract_filename(mp3_file_temp))
-            return None
-    except Exception, e:
-        self.display_logging("Error: %s" % str(e), "r")
+        return None
 
+    # store id3 tags in ac for later restore in file
     author, title = save_id3_tags(self, mp3_file_temp)
     # decode needed for pathnames with non ascii
     mp3_file_mod = (dir_mod.decode(sys.getfilesystemencoding())
@@ -302,17 +302,29 @@ def trim_silence(self, mp3_file_temp, dir_mod):
     #silence 1 0.1 1% reverse
     compression_and_quality = (str(ac.app_mp3_bitrate) + "."
                                 + str(ac.app_mp3_encode_quality))
-    # start subprocess
-    try:
+    # start subprocesses
+    if mp3_bitrate > ac.app_mp3_bitrate:
+        # trim silence with recode to bitrate
+        try:
         #subprocess.Popen(["sox", mp3_file_temp, "-C", "192.2", mp3_file_mod,
-        subprocess.Popen(["sox", mp3_file_temp,
-            "-C", compression_and_quality, mp3_file_mod,
-            "silence", "1", "0.1", "1%", "reverse",
-            "silence", "1", "0.1", "1%", "reverse"],
+            subprocess.Popen(["sox", mp3_file_temp,
+                "-C", compression_and_quality, mp3_file_mod,
+                "silence", "1", "0.1", "1%", "reverse",
+                "silence", "1", "0.1", "1%", "reverse"],
                 stdout=subprocess.PIPE, stderr=subprocess.PIPE).communicate()
-    except Exception, e:
-        self.display_logging("Error: %s" % str(e), "r")
-        return None
+        except Exception, e:
+            self.display_logging("Error: %s" % str(e), "r")
+            return None
+    else:
+        # trim silence looseless without recode
+        subprocess.Popen(["mp3splt", mp3_file_temp, "-r"],
+                stdout=subprocess.PIPE, stderr=subprocess.PIPE).communicate()
+        filename_trimmed = os.path.basename(mp3_file_temp)
+        filename_trimmed = (filename_trimmed[:
+                    string.rfind(filename_trimmed, ".mp3")] + "_trimmed.mp3")
+        mp3_file_temp = os.path.dirname(mp3_file_temp) + "/" + filename_trimmed
+        shutil.copy(mp3_file_temp, mp3_file_mod)
+        self.display_logging(mp3_file_temp, "b")
 
     # check if lenght is different between orig and edited file
     try:
@@ -447,7 +459,8 @@ class my_form(Frame):
         print "lets rock"
         # check packages
         check_package = True
-        check_package = check_packages(self, ["sox", "mp3gain", "easytag"])
+        check_package = check_packages(self,
+                                ["sox", "mp3gain", "mp3splt", "easytag"])
         if check_package is None:
             return
         # check options
