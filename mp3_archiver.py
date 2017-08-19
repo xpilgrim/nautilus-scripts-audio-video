@@ -21,7 +21,7 @@ This script performs the follow actions on the selected files:
     - register mp3Gain in the APE-Tag
 
 If the file has a bitrate grater then set in app_mp3_bitrate,
-then the file will be recoded. Otherwise a looseless trimm will be done.
+then the file will be recoded. Otherwise a lossless trimm will be done.
 
 Depends on:
     Python, Tkinter, python-mutagen, sox, mp3gain, mp3splt, easytag
@@ -316,7 +316,7 @@ def trim_silence(self, mp3_file_temp, dir_mod):
             self.display_logging("Error: %s" % str(e), "r")
             return None
     else:
-        # trim silence looseless without recode
+        # trim silence lossless without recode
         subprocess.Popen(["mp3splt", mp3_file_temp, "-r"],
                 stdout=subprocess.PIPE, stderr=subprocess.PIPE).communicate()
         filename_trimmed = os.path.basename(mp3_file_temp)
