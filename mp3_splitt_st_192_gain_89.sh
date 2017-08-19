@@ -106,7 +106,7 @@ function f_wave_temp () {
 function f_wave_to_mp3 () {
 	file_source=$1
 	file_dest=$2
-	meldung=$(lame -b 192 -m s -o -S "$file_source" "$file_dest" 2>&1 && echo "Ohne_Fehler_beendet")
+	meldung=$(lame -b 192 -m j -o -S --noreplaygain "$file_source" "$file_dest" 2>&1 && echo "Ohne_Fehler_beendet")
 	# alle zeichen von rechts nach dem 'O' fuer fehleranalyse extrahieren
 	error=${meldung##*O}
 	if [ "$error" != "hne_Fehler_beendet" ]; then
@@ -116,7 +116,7 @@ function f_wave_to_mp3 () {
 
 function f_mp3_gain () {
 	file_source=$1
-	meldung=$(mp3gain -r "$file_source" 2>&1 && echo "Ohne_Fehler_beendet")
+	meldung=$(mp3gain "$file_source" 2>&1 && echo "Ohne_Fehler_beendet")
 	# alle zeichen von rechts nach dem 'O' fuer fehleranalyse extrahieren
 	error=${meldung##*O}
 	if [ "$error" != "hne_Fehler_beendet" ]; then
