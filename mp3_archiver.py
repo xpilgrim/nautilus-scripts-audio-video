@@ -324,7 +324,8 @@ def trim_silence(self, mp3_file_temp, dir_mod):
                     string.rfind(filename_trimmed, ".mp3")] + "_trimmed.mp3")
         mp3_file_temp = os.path.dirname(mp3_file_temp) + "/" + filename_trimmed
         shutil.copy(mp3_file_temp, mp3_file_mod)
-        self.display_logging(mp3_file_temp, "b")
+        self.display_logging("Lossless trimmed: " +
+                                extract_filename(mp3_file_mod), None)
 
     # check if lenght is different between orig and edited file
     try:
