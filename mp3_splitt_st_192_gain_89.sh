@@ -31,12 +31,40 @@
 # Copyright (C) Joerg Sorge joergsorge@gmail.com
 # 2011-09-01
 
+function f_choose_msg_lang () {
+	local_locale=$(locale | grep LANGUAGE | cut -d= -f2 | cut -d_ -f1)
+	if [ $local_locale == "de" ]; then
+		msg[1]="installiert"
+		msg[2]="Analysieren..."
+		msg[3]="replayGain berechnen..."
+		msg[4]="wav zu mp3: Bearbeite Dateien..."
+		msg[5]="Abgebrochen..."
+
+		err[1]=" ist nicht installiert, Bearbeitung nicht moeglich."
+		err[2]="Das ist keine mp3 Datei:"
+		err[3]="Fehler beim enkodieren"
+		err[4]="Fehler bei mp3gain"
+	else
+		msg[1]="installed"
+		msg[2]="Analyse..."
+		msg[3]="Calculate replayGain..."
+		msg[4]="wav to mp3: work on files..."
+		msg[5]="Canceled..."
+
+		err[1]=" not installed, work not possible."
+		err[2]="It's not a mp3 file:"
+		err[3]="Error by encoding to mp3 "
+		err[4]="Error by mp3gain"
+	fi
+}
+
+
 function f_check_package () {
 	package_install=$1
 	if dpkg-query -s $1 2>/dev/null|grep -q installed; then
-		echo "$package_install installiert"
+		echo "$package_install ${msg[1]}"
 	else
-		zenity --error --text="Paket $package_install ist nicht installiert, Bearbeitung nicht moeglich." 
+		zenity --error --text="$package_install ${err[1]}"
 		exit
 	fi
 }
@@ -124,25 +152,28 @@ function f_mp3_gain () {
 	fi
 }
 
+
+# switch lang
+f_choose_msg_lang
+# check for packages
+f_check_package "sox"
+f_check_package "mp3gain"
+f_check_package "mp3info"
+f_check_package "lame"
+f_check_package "libav-tools"
+
 echo -n "${NAUTILUS_SCRIPT_SELECTED_FILE_PATHS}" | while read file ; do
 
 report "mp3split"
 (
-
-	# pruefen ob noetige pakete installiert
-	f_check_package "sox"
-	f_check_package "mp3gain"
-	f_check_package "mp3info"
-	f_check_package "lame"
-	f_check_package "libav-tools"
 	filename=$(basename "$file")
 	extension="${filename##*.}"
 	# echo damit progress beginnt zu pulsieren
 	echo "10"
-	echo "# Analyse...\n$filename"
+	echo "# ${msg[2]}\n$filename"
 
 	if [ "$extension" != "mp3" ] && [ "$extension" != "MP3" ]; then
-		zenity --error --text="Ausgewählte Datei ist keine mp3-Datei:\n$filename" 
+		zenity --error --text="${err[2]}\n$filename" 
 		exit
 	fi
 	minutes=$(mp3info -p "%m" "$file" )
@@ -192,7 +223,7 @@ report "mp3split"
 			for (( z=1; z<=$parts_60; z++ ))
 				do
 					echo "# $msg Abschnitt $z, mp3Gain anpassen in:\n${filename%%.*}_$z.mp3"
-					meldung=$(mp3gain -r "${file%%.*}_$z.mp3" 2>&1 && echo "Ohne_Fehler_beendet")
+					meldung=$(mp3gain "${file%%.*}_$z.mp3" 2>&1 && echo "Ohne_Fehler_beendet")
 					# alle zeichen von rechts nach dem 'O' fuer fehleranalyse extrahieren
 					error=${meldung##*O}
 					if [ "$error" != "hne_Fehler_beendet" ]
