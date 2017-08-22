@@ -36,7 +36,7 @@ function f_choose_msg_lang () {
 	if [ $local_locale == "de" ]; then
 		msg[1]="installiert"
 		msg[2]="Analysieren..."
-		msg[3]="replayGain berechnen..."
+		msg[3]="Die Datei hat eine Laenge in Minuten: "
 		msg[4]="wav zu mp3: Bearbeite Dateien..."
 		msg[5]="Abgebrochen..."
 
@@ -47,7 +47,7 @@ function f_choose_msg_lang () {
 	else
 		msg[1]="installed"
 		msg[2]="Analyse..."
-		msg[3]="Calculate replayGain..."
+		msg[3]="Length in minutes: "
 		msg[4]="wav to mp3: work on files..."
 		msg[5]="Canceled..."
 
@@ -177,13 +177,22 @@ report "mp3split"
 		exit
 	fi
 	minutes=$(mp3info -p "%m" "$file" )
-	parts_60=$((minutes/60))
+	#parts_60=$((minutes/60))
+
+	# calc amount of 60 minute pieces
+	parts_60=0
+	for (( z=0; z<$minutes; z+=60 ))
+		do
+			echo $z
+			echo $((parts_60+=1))
+		done
+	echo $zz
 
 	if [ $minutes -gt 60 ] ; then
-		# wenn laenger als 60 Minuten, entspr.Anzahl 60-Minuten-Bloecke vorschlagen 
-		answer=$(zenity --height=200 --width=500 --list --text "Die Datei hat eine Laenge von $minutes Minuten"\
+		# wenn laenger als 60 Minuten, entspr. Anzahl 60-Minuten-Bloecke vorschlagen 
+		answer=$(zenity --height=200 --width=500 --list --text "${msg[3]}$minutes"\
 		 --radiolist --column "Pick" --column "Auswahl"\
-		 TRUE "In $parts_60 gleich lange 60-Minuten Abschnitte teilen! "\
+		 TRUE "In $parts_60 Abschnitte teilen! Erste(r) Abschnitt(e) 60 Min, letzter Abschnitt entspr. der Restzeit"\
 		 FALSE "Manuelle Splittpoints angeben")
 	else
 		# wenn kuerzer als 60 Minuten immer manuell
@@ -196,7 +205,7 @@ report "mp3split"
 	if [ $answ = "In" ] ; then
 		# vorgeschlagene splitts gewaehlt
 		#zenity --info --text="in $answer"
-		msg="In $parts_60 gleich lange 60-Minuten-Abschnitte teilen: \n"
+		msg="In $parts_60 60 Minuten + Rest-Abschnitte teilen: \n"
 		echo "# $msg $filename\nTemp-Datei anlegen: ${filename%%.*}_.wav"
 		f_wave_temp "$file" "${file%%.*}_.wav"
 		
