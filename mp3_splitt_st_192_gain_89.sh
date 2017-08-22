@@ -53,11 +53,16 @@ function f_choose_msg_lang () {
 Mehrere Teile durch Schraegstriche trennen.\nZ.B. zwei aufeinanderfolgende Teile von 60 Minuten Laenge: \n[00:00-60:00/60:00-60:00]  "
 		msg[17]="Abschnitte teilen"
 		msg[18]="mp3-splitt: Datei bearbeiten"
+		msg[19]="Abgebrochen..."
 
 		err[1]=" ist nicht installiert, Bearbeitung nicht moeglich."
 		err[2]="Das ist keine mp3 Datei:"
 		err[3]="Fehler beim enkodieren"
 		err[4]="Fehler bei mp3gain"
+		err[5]="Eingabe von Startzeit nicht korrekt!"
+		err[6]="Eingabe von Laenge nicht korrekt!"
+		err[7]="Fehler beim Enkodieren"
+		err[8]="Fehler bei mp3gain"
 	else
 		msg[1]="installed"
 		msg[2]="Analyse..."
@@ -77,11 +82,16 @@ Mehrere Teile durch Schraegstriche trennen.\nZ.B. zwei aufeinanderfolgende Teile
 		msg[16]="Type start and lenght [mm:ss-mm:ss]\n Slash for next piece e.g. [00:00-60:00/60:00-60:00]  "
 		msg[17]="pieces"
 		msg[18]="mp3 splitt: work on files"
+		msg[19]="Canceled..."
 
 		err[1]=" not installed, work not possible."
 		err[2]="It's not a mp3 file:"
 		err[3]="Error by encoding to mp3 "
 		err[4]="Error by mp3gain"
+		err[5]="Input for start time not valid"
+		err[6]="Input for length not valid"
+		err[7]="Error by encoding to mp3 "
+		err[8]="Error by mp3gain"
 	fi
 }
 
@@ -106,7 +116,7 @@ function f_check_param () {
 		audio_start=${parameters:0:5}
 		temp_param_2=${parameters:6:6}
 		if [[ ! "$audio_start" =~ [0-9][0-9]:[0-9][0-9] ]]; then
-			zenity --error --text="Eingabe von Startzeit nicht korrekt!"
+			zenity --error --text="${err[5]}"
 			abbruch="yes"
 		fi
 		;;
@@ -114,12 +124,12 @@ function f_check_param () {
 		audio_start=${parameters:0:6}
 		temp_param_2=${parameters:7:6}
 		if [[ ! "$audio_start" =~ [0-9][0-9][0-9]:[0-9][0-9] ]]; then
-			zenity --error --text="Eingabe von Startzeit nicht korrekt!"
+			zenity --error --text="${err[5]}"
 			abbruch="yes"
 		fi
 		;;
 		*)
-		zenity --error --text="Eingabe von Startzeit nicht korrekt!"
+		zenity --error --text="${err[5]}"
 		abbruch="yes"	
 	esac
 									
@@ -130,19 +140,19 @@ function f_check_param () {
 		3) 
 		audio_length=${temp_param_2:0:5}
 		if [[ ! "$audio_length" =~ [0-9][0-9]:[0-9][0-9] ]]; then
-			zenity --error --text="Eingabe von Laenge nicht korrekt!"
+			zenity --error --text="${err[6]}"
 			abbruch="yes"
 		fi
 		;;
 		4) 
 		audio_length=${temp_param_2:0:6}
 		if [[ ! "$audio_length" =~ [0-9][0-9][0-9]:[0-9][0-9] ]]; then
-			zenity --error --text="Eingabe von Laenge nicht korrekt!"
+			zenity --error --text="${err[6]}"
 			abbruch="yes"
 		fi
 		;;
 		*)
-		zenity --error --text="Eingabe von Laenge nicht korrekt!"
+		zenity --error --text="${err[6]}"
 		abbruch="yes"				
 	esac
 
@@ -165,7 +175,7 @@ function f_wave_to_mp3 () {
 	# alle zeichen von rechts nach dem 'S' fuer fehleranalyse extrahieren
 	error=${meldung##*S}
 	if [ "$error" != "uccess" ]; then
-		echo "$meldung" | zenity --title="mp3-Konvertierungs-Fehler " --text-info --width=500 --height=200
+		echo "$meldung" | zenity --title="${err[7]}" --text-info --width=500 --height=200
 	fi
 }
 
@@ -175,7 +185,7 @@ function f_mp3_gain () {
 	# alle zeichen von rechts nach dem 'S' fuer fehleranalyse extrahieren
 	error=${meldung##*S}
 	if [ "$error" != "uccess" ]; then
-		echo "$meldung" | zenity --title="mp3-Gain-Fehler " --text-info --width=500 --height=200
+		echo "$meldung" | zenity --title="${err[8]} " --text-info --width=500 --height=200
 	fi
 }
 
@@ -352,7 +362,7 @@ report "mp3split"
            --title="${msg[18]}" --text="..." --width=500 --pulsate --auto-close
 
 if [ "$?" = -1 ] ; then
-	zenity --error --text="mp3-splitt: Bearbeitung abgebrochen"
+	zenity --error --text="${msg[19]}"
 fi
 done
 exit
