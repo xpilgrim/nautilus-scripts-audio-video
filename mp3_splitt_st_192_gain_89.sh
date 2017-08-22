@@ -48,6 +48,11 @@ function f_choose_msg_lang () {
 		msg[12]="Enkodieren zu mp3"
 		msg[13]="replayGain berechnen"
 		msg[14]="Temp-Datei loeschen"
+		msg[15]="Dateilaenge in Minuten"
+		msg[16]="Startpunkt und Dauer der Abschnitte in [mm:ss-mm:ss] eingeben!
+Mehrere Teile durch Schraegstriche trennen.\nZ.B. zwei aufeinanderfolgende Teile von 60 Minuten Laenge: \n[00:00-60:00/60:00-60:00]  "
+		msg[17]="Abschnitte teilen"
+		msg[18]="mp3-splitt: Datei bearbeiten"
 
 		err[1]=" ist nicht installiert, Bearbeitung nicht moeglich."
 		err[2]="Das ist keine mp3 Datei:"
@@ -68,6 +73,10 @@ function f_choose_msg_lang () {
 		msg[12]="Encode to mp3"
 		msg[13]="Calculate replayGain"
 		msg[14]="Remove temp file"
+		msg[15]="Length of file in minutes"
+		msg[16]="Type start and lenght [mm:ss-mm:ss]\n Slash for next piece e.g. [00:00-60:00/60:00-60:00]  "
+		msg[17]="pieces"
+		msg[18]="mp3 splitt: work on files"
 
 		err[1]=" not installed, work not possible."
 		err[2]="It's not a mp3 file:"
@@ -262,16 +271,13 @@ report "mp3split"
 			rm -f "${file%%.*}_.wav"
 
 		fi
-	else # $answ = "In"
+	else # $answ = "1."
 		# wenn vorherige radiolist nicht abgebrochen, muss "Ma" in answ stehen
-		if [ $answ = "Ma" ] ; then
+		if [ $answ = "2." ] ; then
 				
 			params=$(zenity\
 			 --entry --text \
-			"Die mp3-Datei hat eine Laenge von: $minutes Minuten. 
-Zum Teilen bitte Startpunkt und Dauer der gewuenschten Abschnitte in [mm:ss-mm:ss] eingeben!
-Für mehrere Teile bitte durch Schraegstriche trennen.
-z.B. zwei aufeinanderfolgende Teile von 60 Minuten Laenge: [00:00-60:00/60:00-60:00]  " \
+			"${msg[15]}: $minutes\n ${msg[16]}" \
 			--entry-text "00:00-60:00/60:00-60:00")
 
 			if [ ! "$params" ] ; then
@@ -285,8 +291,8 @@ z.B. zwei aufeinanderfolgende Teile von 60 Minuten Laenge: [00:00-60:00/60:00-60
 			#zenity --info --text="$anzahl_splits"				
 			#zenity --info --text="${#anzahl_splits}"
 
-			msg="In $anzahl_splits Abschnitte teilen: \n"
-			echo "# $msg $filename\nTemp-Datei anlegen: ${filename%%.*}_.wav"
+			msg="${msg[5]} $anzahl_splits ${msg[17]}: \n"
+			echo "# $msg $filename\n${msg[9]}: ${filename%%.*}_.wav"
 			f_wave_temp "$file" "${file%%.*}_.wav"
 
 			if [ -f "${file%%.*}_.wav" ] ; then
@@ -307,7 +313,7 @@ z.B. zwei aufeinanderfolgende Teile von 60 Minuten Laenge: [00:00-60:00/60:00-60
 					for (( z=1; z<=$anzahl_splits; z++ ))
 						do
 							f_check_param $params_temp
-							echo "# $msg Abschnitt $z, $audio_start - $audio_length erzeugen aus:\n${filename%%.*}_.wav"
+							echo "# $msg ${msg[10]} $z, $audio_start - $audio_length ${msg[11]}\n${filename%%.*}_.wav"
 							sox "${file%%.*}_.wav" "${file%%.*}_$z.wav" trim $audio_start $audio_length
 							pos_slash=`expr index "$params_temp" "/"`
 							params_temp=${params_temp:$pos_slash}
@@ -316,21 +322,21 @@ z.B. zwei aufeinanderfolgende Teile von 60 Minuten Laenge: [00:00-60:00/60:00-60
 					# Splitts in mp3 konvertieren
 					for (( z=1; z<=$anzahl_splits; z++ ))
 						do
-							echo "# $msg Abschnitt $z, Konvertierung in mp3 aus:\n${filename%%.*}_$z.wav"
+							echo "# $msg ${msg[10]} $z, ${msg[12]}:\n${filename%%.*}_$z.wav"
 							f_wave_to_mp3 "${file%%.*}_$z.wav" "${file%%.*}_$z.mp3"
 						done
 
 					# Splitts mp3-gain
 					for (( z=1; z<=$anzahl_splits; z++ ))
 						do
-							echo "# $msg Abschnitt $z, mp3Gain anpassen in:\n${filename%%.*}_$z.mp3"
+							echo "# $msg ${msg[10]} $z, ${msg[13]}:\n${filename%%.*}_$z.mp3"
 							f_mp3_gain "${file%%.*}_$z.mp3"
 						done
 					
 					# tempfiles loeschen
 					for (( z=1; z<=$anzahl_splits; z++ ))
 						do
-							echo "# $msg Temp-Datei loeschen:\n${filename%%.*}_$z.wav"
+							echo "# $msg ${msg[14]}:\n${filename%%.*}_$z.wav"
 						rm -f "${file%%.*}_$z.wav"
 						done
 					rm -f "${file%%.*}_.wav"
@@ -343,7 +349,7 @@ z.B. zwei aufeinanderfolgende Teile von 60 Minuten Laenge: [00:00-60:00/60:00-60
 	fi # $answ = "In"
 
 ) | zenity --progress \
-           --title="mp3-splitt: Datei bearbeiten" --text="..." --width=500 --pulsate --auto-close
+           --title="${msg[18]}" --text="..." --width=500 --pulsate --auto-close
 
 if [ "$?" = -1 ] ; then
 	zenity --error --text="mp3-splitt: Bearbeitung abgebrochen"
