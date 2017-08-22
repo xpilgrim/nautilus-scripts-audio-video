@@ -37,8 +37,17 @@ function f_choose_msg_lang () {
 		msg[1]="installiert"
 		msg[2]="Analysieren..."
 		msg[3]="Die Datei hat eine Laenge in Minuten: "
-		msg[4]="wav zu mp3: Bearbeite Dateien..."
-		msg[5]="Abgebrochen..."
+		msg[4]="Auswahl..."
+		msg[5]="In"
+		msg[6]="Abschnitte teilen! Erste(r) Abschnitt(e) 60 Min, letzter Abschnitt entspr. der Restzeit"
+		msg[7]="Manuelle Splittpoints angeben"
+		msg[8]="Abschnitte teilen"
+		msg[9]="Temp-Datei anlegen:"
+		msg[10]="Abschnitt"
+		msg[11]="erzeugen aus:"
+		msg[12]="Enkodieren zu mp3"
+		msg[13]="replayGain berechnen"
+		msg[14]="Temp-Datei loeschen"
 
 		err[1]=" ist nicht installiert, Bearbeitung nicht moeglich."
 		err[2]="Das ist keine mp3 Datei:"
@@ -48,8 +57,17 @@ function f_choose_msg_lang () {
 		msg[1]="installed"
 		msg[2]="Analyse..."
 		msg[3]="Length in minutes: "
-		msg[4]="wav to mp3: work on files..."
-		msg[5]="Canceled..."
+		msg[4]="Choose..."
+		msg[5]="Splitt to"
+		msg[6]="pieces! First(s) 60 Min, last with legth of tail"
+		msg[7]="Set splitt points manually"
+		msg[8]="pieces"
+		msg[9]="Temp file:"
+		msg[10]="Piece"
+		msg[11]="from:"
+		msg[12]="Encode to mp3"
+		msg[13]="Calculate replayGain"
+		msg[14]="Remove temp file"
 
 		err[1]=" not installed, work not possible."
 		err[2]="It's not a mp3 file:"
@@ -190,23 +208,23 @@ report "mp3split"
 
 	if [ $minutes -gt 60 ] ; then
 		# wenn laenger als 60 Minuten, entspr. Anzahl 60-Minuten-Bloecke vorschlagen 
-		answer=$(zenity --height=200 --width=500 --list --text "${msg[3]}$minutes"\
-		 --radiolist --column "Pick" --column "Auswahl"\
-		 TRUE "In $parts_60 Abschnitte teilen! Erste(r) Abschnitt(e) 60 Min, letzter Abschnitt entspr. der Restzeit"\
-		 FALSE "Manuelle Splittpoints angeben")
+		answer=$(zenity --height=200 --width=700 --list --text "${msg[3]}$minutes"\
+		 --radiolist --column "Pick" --column "${msg[4]}"\
+		 TRUE "1. ${msg[5]} $parts_60 ${msg[6]} "\
+		 FALSE "2. ${msg[7]}")
 	else
 		# wenn kuerzer als 60 Minuten immer manuell
-		answer="Manuelle Splittpoints angeben"
+		answer="${msg[7]}"
 	fi
 
 	answ=${answer:0:2} 
 	#zenity --info --text="$answ"
 	
-	if [ $answ = "In" ] ; then
+	if [ $answ = "1." ] ; then
 		# vorgeschlagene splitts gewaehlt
 		#zenity --info --text="in $answer"
-		msg="In $parts_60 60 Minuten + Rest-Abschnitte teilen: \n"
-		echo "# $msg $filename\nTemp-Datei anlegen: ${filename%%.*}_.wav"
+		msg="${msg[5]} $parts_60 ${msg[8]}: \n"
+		echo "# $msg $filename\n${msg[9]} ${filename%%.*}_.wav"
 		f_wave_temp "$file" "${file%%.*}_.wav"
 		
 		if [ -f "${file%%.*}_.wav" ] ; then
@@ -216,7 +234,7 @@ report "mp3split"
 			# Splitts als wav schreiben
 			for (( z=1; z<=$parts_60; z++ ))
 				do
-					echo "# $msg Abschnitt $z, $audio_start:00 - $audio_length:00 erzeugen aus:\n${filename%%.*}_.wav"
+					echo "# $msg ${msg[10]} $z, $audio_start:00 - $audio_length:00 ${msg[11]}\n${filename%%.*}_.wav"
 					sox "${file%%.*}_.wav" "${file%%.*}_$z.wav" trim $audio_start:00 $audio_length:00
 					audio_start=$(($audio_start+60))
 				done
@@ -224,21 +242,21 @@ report "mp3split"
 			# Splitts in mp3 konvertieren
 			for (( z=1; z<=$parts_60; z++ ))
 				do
-					echo "# $msg Abschnitt $z, Konvertierung in mp3 aus:\n${filename%%.*}_$z.wav"
+					echo "# $msg ${msg[10]} $z, ${msg[12]}:\n${filename%%.*}_$z.wav"
 					f_wave_to_mp3 "${file%%.*}_$z.wav" "${file%%.*}_$z.mp3"
 				done
 
 			# Splitts mp3Gain
 			for (( z=1; z<=$parts_60; z++ ))
 				do
-					echo "# $msg Abschnitt $z, mp3Gain anpassen in:\n${filename%%.*}_$z.mp3"
+					echo "# $msg ${msg[10]} $z, ${msg[13]}:\n${filename%%.*}_$z.mp3"
 					f_mp3_gain "${file%%.*}_$z.mp3"
 				done
 
 			# tempfiles loeschen
 			for (( z=1; z<=$parts_60; z++ ))
 				do
-					echo "# $msg Temp-Datei loeschen:\n${filename%%.*}_$z.wav"
+					echo "# $msg ${msg[14]}:\n${filename%%.*}_$z.wav"
 					rm -f "${file%%.*}_$z.wav"
 				done
 			rm -f "${file%%.*}_.wav"
