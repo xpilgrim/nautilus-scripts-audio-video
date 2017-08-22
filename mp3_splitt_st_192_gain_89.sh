@@ -223,13 +223,7 @@ report "mp3split"
 			for (( z=1; z<=$parts_60; z++ ))
 				do
 					echo "# $msg Abschnitt $z, mp3Gain anpassen in:\n${filename%%.*}_$z.mp3"
-					meldung=$(mp3gain "${file%%.*}_$z.mp3" 2>&1 && echo "Ohne_Fehler_beendet")
-					# alle zeichen von rechts nach dem 'O' fuer fehleranalyse extrahieren
-					error=${meldung##*O}
-					if [ "$error" != "hne_Fehler_beendet" ]
-						then
-						echo "$meldung" | zenity --title="mp3-Gain-Fehler " --text-info --width=500 --height=200
-					fi
+					f_mp3_gain "${file%%.*}_$z.mp3"
 				done
 
 			# tempfiles loeschen
@@ -303,7 +297,7 @@ z.B. zwei aufeinanderfolgende Teile von 60 Minuten Laenge: [00:00-60:00/60:00-60
 					for (( z=1; z<=$anzahl_splits; z++ ))
 						do
 							echo "# $msg Abschnitt $z, mp3Gain anpassen in:\n${filename%%.*}_$z.mp3"
-							f_mp3_gain "${file%%.*}_$z.mp3" 
+							f_mp3_gain "${file%%.*}_$z.mp3"
 						done
 					
 					# tempfiles loeschen
