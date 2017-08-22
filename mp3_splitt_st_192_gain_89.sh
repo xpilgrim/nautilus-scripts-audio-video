@@ -134,20 +134,20 @@ function f_wave_temp () {
 function f_wave_to_mp3 () {
 	file_source=$1
 	file_dest=$2
-	meldung=$(lame -b 192 -m j -o -S --noreplaygain "$file_source" "$file_dest" 2>&1 && echo "Ohne_Fehler_beendet")
-	# alle zeichen von rechts nach dem 'O' fuer fehleranalyse extrahieren
-	error=${meldung##*O}
-	if [ "$error" != "hne_Fehler_beendet" ]; then
+	meldung=$(lame -b 192 -m j -o -S --noreplaygain "$file_source" "$file_dest" 2>&1 && echo "Success")
+	# alle zeichen von rechts nach dem 'S' fuer fehleranalyse extrahieren
+	error=${meldung##*S}
+	if [ "$error" != "uccess" ]; then
 		echo "$meldung" | zenity --title="mp3-Konvertierungs-Fehler " --text-info --width=500 --height=200
 	fi
 }
 
 function f_mp3_gain () {
 	file_source=$1
-	meldung=$(mp3gain "$file_source" 2>&1 && echo "Ohne_Fehler_beendet")
-	# alle zeichen von rechts nach dem 'O' fuer fehleranalyse extrahieren
-	error=${meldung##*O}
-	if [ "$error" != "hne_Fehler_beendet" ]; then
+	meldung=$(mp3gain "$file_source" 2>&1 && echo "Success")
+	# alle zeichen von rechts nach dem 'S' fuer fehleranalyse extrahieren
+	error=${meldung##*S}
+	if [ "$error" != "uccess" ]; then
 		echo "$meldung" | zenity --title="mp3-Gain-Fehler " --text-info --width=500 --height=200
 	fi
 }
