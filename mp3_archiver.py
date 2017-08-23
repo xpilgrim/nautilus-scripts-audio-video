@@ -92,6 +92,46 @@ class app_config(object):
         self.app_errorfile = "error_audio_archiver.log"
 
 
+def switch_lang(self):
+    """switch lang for msgs"""
+    self.msg = ["lang"]
+    self.err = ["lang"]
+    if os.getenv('LANG')[0:2] == "de":
+        self.msg.append(
+            "Es kann eine Weile dauern, "
+            + "vielleicht eine Tasse Kaffee holen...")  # 1
+
+        self.err.append("Fehlendes Paket ")
+        self.err.append(" Bitte installieren durch\n sudo apt-get install ")
+        self.err.append("\nUngueltige Bitrate: ")  # 3
+        self.err.append("Gueltige Bitraten sind: 192, 256 oder 320! "
+            + "Bitte den Wert von app_mp3_bitrate aendern.")  # 4
+        self.err.append("\nUngueltige Qualitaetsstufe fuer Encodierung: ")
+        self.err.append("\nDie Empfohlene Stufe ist 2. \n"
+            + "Moeglich sind Werte zw. 1 und 6, hoeher ist geringere Qualitaet,"
+            + " 99 fuer beste."
+            + "\nBitte Wert aendern in: app_mp3_encode_quality")
+        self.err.append("Dies ist ein Nautilus Script, "
+            + "zum Bearbeiten muessen Dateien ausgewaehlt sein.")  # 7
+    else:
+        self.msg.append(
+            "Working, this can take a while, enjoy a cup of coffee...\n")  # 1
+
+        self.err.append("Missing package ")  # 1
+        self.err.append("!\nPlease install it with:\n sudo apt-get install ")
+        self.err.append("\nThe current bitrate is set to a wrong value: ")  # 3
+        self.err.append("The bitrate option must be 192, 256 or 320! "
+            + "Please correct your entry in: app_mp3_bitrate")
+        self.err.append(
+            "\nThe current encode quality is set to a wrong value: ")  # 5
+        self.err.append(
+            "The encode quality option must be 99 for best quality, "
+                    + "or a value between 1 and 6, higher is lower quality! "
+                    + "\nPlease correct your entry in: app_mp3_encode_quality")
+        self.err.append("This is a nautilus script "
+            + "that need one or more selected files for working on")
+
+
 def check_packages(self, package_list):
     """check_packages"""
     try:
@@ -103,9 +143,7 @@ def check_packages(self, package_list):
             #print p
             #print string.find(p[0], "installed")
             if string.find(p[0], "installed") == -1:
-                message = ("Missing package " + package
-                                + "!\nPlease install it with:\n"
-                                + "sudo apt-get install " + package)
+                message = (self.err[1] + package + self.err[2] + package)
                 self.display_logging(message, "r")
                 return None
     except Exception, e:
@@ -426,8 +464,7 @@ class my_form(Frame):
         self.textBox.pack()
         self.textBox.tag_config("b", foreground="blue")
         self.textBox.tag_config("r", foreground="red")
-        self.textBox.insert(END,
-                "Working, this can take a while, enjoy a cup of coffee...\n")
+        #self.textBox.insert(END,)
         self.pressButton = Button(self,
                 text="ID3 easyTAG Editor", command=self.call_id3_editor)
         # the button will appear when finished
@@ -458,12 +495,16 @@ class my_form(Frame):
     def lets_rock(self):
         """man funktion"""
         print "lets rock"
+        switch_lang(self)
+        self.display_logging(self.msg[1], None)
+
         # check packages
         check_package = True
         check_package = check_packages(self,
                                 ["sox", "mp3gain", "mp3splt", "easytag"])
         if check_package is None:
             return
+
         # check options
         mp3_bitrate_options = [192, 256, 320]
         mp3_bitrate_option_valid = None
@@ -473,14 +514,8 @@ class my_form(Frame):
                 mp3_bitrate_option_valid = True
 
         if mp3_bitrate_option_valid is None:
-            self.display_logging(
-                    "\nThe current bitrate is set to a wrong value: "
-                    + str(ac.app_mp3_bitrate),
-                                    "r")
-            self.display_logging(
-                    "The bitrate option must be 192, 256 or 320! "
-                    + "Please correct your entry in: app_mp3_bitrate",
-                                    None)
+            self.display_logging(self.err[3] + str(ac.app_mp3_bitrate), "r")
+            self.display_logging(self.err[4], None)
             return
 
         mp3_encode_quality_options = [99, 1, 2, 3, 4, 5, 6]
@@ -491,15 +526,9 @@ class my_form(Frame):
                 mp3_encode_quality_option_valid = True
 
         if mp3_encode_quality_option_valid is None:
-            self.display_logging(
-                    "\nThe current encode quality is set to a wrong value: "
-                    + str(ac.app_mp3_encode_quality),
+            self.display_logging(self.err[5] + str(ac.app_mp3_encode_quality),
                                     "r")
-            self.display_logging(
-                    "The encode quality option must be 99 for best quality, "
-                    + "or a value between 1 and 6, higher is lower quality! "
-                    + "Please correct your entry in: app_mp3_encode_quality",
-                                    None)
+            self.display_logging(self.err[6], None)
             return
 
         try:
@@ -507,8 +536,7 @@ class my_form(Frame):
                 os.environ['NAUTILUS_SCRIPT_SELECTED_FILE_PATHS'].splitlines())
         except Exception, e:
             self.display_logging("Error: %s" % str(e), "r")
-            self.display_logging("This is a nautilus script "
-                + "that need one or more selected files for working on", None)
+            self.display_logging(self.err[7], None)
             return
 
         workin_path = os.path.dirname(path_files[0])
