@@ -104,10 +104,26 @@ def switch_lang(self):
         self.msg.append("\nDateien:")
         self.msg.append("\nWir sind fertig, sorry, "
             + "wahrscheinlich nicht genung Zeit fuer einen Kaffee...")  # 4
-        self.msg.append("\nStille trimmen, das dauert etwas...")
+        self.msg.append("\nStille trimmen, ID3-Tags bearbeiten, "
+            + "das dauert etwas...")
         self.msg.append("\nmp3Gain berechnen...")  # 6
         self.msg.append("\nTemp Verzeichnis geloescht...")
         self.msg.append("\nMod Verzeichnis geloescht...")  # 8
+        self.msg.append("\nBitte Folgendes beachten!")
+        self.msg.append("Diese Dateien konnten nicht bearbeitet werden, "
+            + "sie haben eine zu niedrige Bitrate")  # 10
+        self.msg.append("\nDiese Dateien haben keine ID3 Tags Version 2")
+        self.msg.append("\nDiese Dateien mussten nicht getrimmt werden, "
+            + "bitte manuell kontrollieren: lame replaygain, xing header etc.:")
+        self.msg.append("\nEine oder mehrere Dateien konnten nicht aus dem "
+            + "Mod-Verzeichnis verschoben werden, bitte manuell erledigen!")
+        self.msg.append("\nGeschafft, "
+            + "ich hoffe der Kaffee war gut?")  # 14
+        self.msg.append("\nOriginale werden gespeichert in:")
+        self.msg.append("\nTemporaere Dateien werden gespeichert in:")  # 16
+        self.msg.append("\nBearbeitete Dateien werden gespeichert in:")
+        self.msg.append("\nOriginale sichern, Dateinamen bearbeiten...")  # 18
+        self.msg.append("\nDateiname geaendert:")
 
         self.err.append("Fehlendes Paket ")
         self.err.append(" Bitte installieren durch\n sudo apt-get install ")
@@ -129,10 +145,26 @@ def switch_lang(self):
         self.msg.append("\nFiles to work on:")
         self.msg.append("\nNow we are finished, "
             + "sorry, I think it was not enough time for coffee...")  # 4
-        self.msg.append("\nTrim silence, this can take a while...")
+        self.msg.append("\nTrim silence, edit Tags, this can take a while...")
         self.msg.append("\nmp3Gain, this can take a while...")  # 6
         self.msg.append("\nTemp Directory removed...")
         self.msg.append("\nMod Directory removed...")  # 8
+        self.msg.append("\nPlease take care about the following issues!")
+        self.msg.append("This files are not editable, "
+            + "while they have to low bitrate:")  # 10
+        self.msg.append("\nThis files hasn't ID3 Tags Version 2, "
+            + "please use an ID3-Tagger:")
+        self.msg.append("\nThis files wasn't trimmed, "
+            + "please analyse manually lame replaygain, xing header etc.:")
+        self.msg.append("\nOne or more files couldn't moved out "
+            + "from mod directory, please do it manually!")
+        self.msg.append("\nNow we are finished, "
+            + "I hope the coffee was fine?")  # 14
+        self.msg.append("\nOriginal files will be saved in:")
+        self.msg.append("\nTemp files will be saved in:")  # 16
+        self.msg.append("\nModified files will be saved in:")
+        self.msg.append("\nBackup files, check filenames...")  # 18
+        self.msg.append("\nModified filename:")
 
         self.err.append("Missing package ")  # 1
         self.err.append("!\nPlease install it with:\n sudo apt-get install ")
@@ -222,7 +254,7 @@ def check_and_mod_filenames(self, mp3_files):
     """search for forbidden charakters in filenames, if found rename"""
     mp3_files_temp = []
     mp3_files_mod = []
-    self.display_logging("\nOriginal files will be saved in:", None)
+    self.display_logging(self.msg[15], None)
     #dir_orig = (os.path.dirname(mp3_files[0]) + "/audio_archiver_"
     # take the tail of filepath in the name of backup dir
     dir_orig = (os.path.dirname(mp3_files[0]) + "/"
@@ -230,13 +262,13 @@ def check_and_mod_filenames(self, mp3_files):
         + datetime.datetime.now().strftime("%Y_%m_%d_%H_%M_%S") + "_original")
     self.display_logging(dir_orig, None)
 
-    self.display_logging("\nTemp files will be saved in:", None)
+    self.display_logging(self.msg[16], None)
     #self.display_logging(datetime.datetime.now().strftime("%Y_%m_%d_%H_%M_%S"))
     dir_temp = (os.path.dirname(mp3_files[0]) + "/audio_archiver_"
             + datetime.datetime.now().strftime("%Y_%m_%d_%H_%M_%S") + "_temp")
     self.display_logging(dir_temp, None)
 
-    self.display_logging("\nModified files will be saved in:", None)
+    self.display_logging(self.msg[17], None)
     dir_mod = (os.path.dirname(mp3_files[0]) + "/audio_archiver_"
             + datetime.datetime.now().strftime("%Y_%m_%d_%H_%M_%S") + "_mod")
     self.display_logging(dir_mod, None)
@@ -247,7 +279,7 @@ def check_and_mod_filenames(self, mp3_files):
     except Exception, e:
         self.display_logging("Error: %s" % str(e), "r")
 
-    self.display_logging("\nBackup files, check filenames...", None)
+    self.display_logging(self.msg[18], None)
     # backup in orig
     for item in mp3_files:
         file_destination = dir_orig + "/" + extract_filename(item)
@@ -266,7 +298,7 @@ def check_and_mod_filenames(self, mp3_files):
         filename_mod = remove_points(filename_mod)
 
         if extract_filename(item) != filename_mod:
-            self.display_logging("\nModified filename:", None)
+            self.display_logging(self.msg[19], None)
             self.display_logging(filename_mod, "b")
 
         #self.display_logging(item, "b")
@@ -300,7 +332,7 @@ def check_and_mod_filenames(self, mp3_files):
 def mp3gain(self, mp3_file):
     """mp3-gain"""
     print u"mp3-File Gainanpassung"
-    self.display_logging("\nmp3gain for: ", None)
+    #self.display_logging("\nmp3gain for: ", None)
     self.display_logging(extract_filename(mp3_file), None)
     # start subprocess
     try:
@@ -332,7 +364,7 @@ def trim_silence(self, mp3_file_temp, dir_mod):
     by this action we trash all additional tags"""
 
     print u"mp3-File trim silence"
-    self.display_logging("\nTrim silence and editing tags for:", None)
+    #self.display_logging("\nTrim silence and editing tags for:", None)
     self.display_logging(extract_filename(mp3_file_temp), None)
     try:
         audio = MP3(mp3_file_temp)
@@ -639,40 +671,27 @@ class my_form(Frame):
         if (len(ac.log_message_summary_bitrate) != 0
             or len(ac.log_message_summary_id3tag) != 0
             or len(ac.log_message_summary_no_silence) != 0):
-                self.display_logging(
-                        "\nPlease take care about the following issues!",
-                        "b")
+                self.display_logging(self.msg[9], "b")
 
         if len(ac.log_message_summary_bitrate) != 0:
-            self.display_logging(
-            "This files are not editable, while they have to low bitrate:",
-            "r")
+            self.display_logging(self.msg[10], "r")
             for item in ac.log_message_summary_bitrate:
                 self.display_logging(item, None)
 
         if len(ac.log_message_summary_id3tag) != 0:
-            self.display_logging(
-            "\nThis files hasn't ID3 Tags Version 2, please use an ID3-Tagger:",
-                                    "r")
+            self.display_logging(self.msg[11], "r")
             for item in ac.log_message_summary_id3tag:
                 self.display_logging(item, None)
 
         if len(ac.log_message_summary_no_silence) != 0:
-            self.display_logging(
-            "\nThis files wasn't trimmed, "
-            + "please analyse manually lame replaygain, xing header etc.:",
-                                    "r")
+            self.display_logging(self.msg[12], "r")
             for item in ac.log_message_summary_no_silence:
                 self.display_logging(item, None)
 
         if ac.log_message_summary_not_moved is True:
-            self.display_logging(
-            "\nOne or more files couldn't moved out from mod directory, "
-            + "please do it manually!",
-                                    "r")
+            self.display_logging(self.msg[13], "r")
 
-        self.display_logging(
-            "\nNow we are finished, I hope the coffee was fine?", None)
+        self.display_logging(self.msg[14], None)
 
         # Button for calling easyTAG editor
         #self.pressButton.pack()
