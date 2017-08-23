@@ -99,7 +99,15 @@ def switch_lang(self):
     if os.getenv('LANG')[0:2] == "de":
         self.msg.append(
             "Es kann eine Weile dauern, "
-            + "vielleicht eine Tasse Kaffee holen...")  # 1
+            + "vielleicht eine Tasse Kaffee geniessen...")  # 1
+        self.msg.append("\nArbeitsverzeichnis:")  # 2
+        self.msg.append("\nDateien:")
+        self.msg.append("\nWir sind fertig, sorry, "
+            + "wahrscheinlich nicht genung Zeit fuer einen Kaffee...")  # 4
+        self.msg.append("\nStille trimmen, das dauert etwas...")
+        self.msg.append("\nmp3Gain berechnen...")  # 6
+        self.msg.append("\nTemp Verzeichnis geloescht...")
+        self.msg.append("\nMod Verzeichnis geloescht...")  # 8
 
         self.err.append("Fehlendes Paket ")
         self.err.append(" Bitte installieren durch\n sudo apt-get install ")
@@ -113,9 +121,18 @@ def switch_lang(self):
             + "\nBitte Wert aendern in: app_mp3_encode_quality")
         self.err.append("Dies ist ein Nautilus Script, "
             + "zum Bearbeiten muessen Dateien ausgewaehlt sein.")  # 7
+        self.err.append("Keine mp3 Dateien gefunden...")  # 8
     else:
         self.msg.append(
             "Working, this can take a while, enjoy a cup of coffee...\n")  # 1
+        self.msg.append("\nDirectory to work in:")  # 2
+        self.msg.append("\nFiles to work on:")
+        self.msg.append("\nNow we are finished, "
+            + "sorry, I think it was not enough time for coffee...")  # 4
+        self.msg.append("\nTrim silence, this can take a while...")
+        self.msg.append("\nmp3Gain, this can take a while...")  # 6
+        self.msg.append("\nTemp Directory removed...")
+        self.msg.append("\nMod Directory removed...")  # 8
 
         self.err.append("Missing package ")  # 1
         self.err.append("!\nPlease install it with:\n sudo apt-get install ")
@@ -130,6 +147,7 @@ def switch_lang(self):
                     + "\nPlease correct your entry in: app_mp3_encode_quality")
         self.err.append("This is a nautilus script "
             + "that need one or more selected files for working on")
+        self.err.append("No mp3 files found...")  # 8
 
 
 def check_packages(self, package_list):
@@ -464,7 +482,15 @@ class my_form(Frame):
         self.textBox.pack()
         self.textBox.tag_config("b", foreground="blue")
         self.textBox.tag_config("r", foreground="red")
-        #self.textBox.insert(END,)
+        # insert the msg from lets_rock will display when finished,
+        # that's to late
+        if os.getenv('LANG')[0:2] == "de":
+            self.textBox.insert(END,
+                "Es kann eine Weile dauern, "
+                + "vielleicht eine Tasse Kaffee geniessen...")
+        else:
+            self.textBox.insert(END,
+            "Working, this can take a while, enjoy a cup of coffee...\n")
         self.pressButton = Button(self,
                 text="ID3 easyTAG Editor", command=self.call_id3_editor)
         # the button will appear when finished
@@ -496,7 +522,7 @@ class my_form(Frame):
         """man funktion"""
         print "lets rock"
         switch_lang(self)
-        self.display_logging(self.msg[1], None)
+        #self.display_logging(self.msg[1], None)
 
         # check packages
         check_package = True
@@ -550,9 +576,9 @@ class my_form(Frame):
         #                            "r")
         #        return
 
-        self.display_logging("\nDirectory to work in:", None)
+        self.display_logging(self.msg[2], None)
         self.display_logging(os.path.dirname(path_files[0]), None)
-        self.display_logging("\nFiles to work on:", None)
+        self.display_logging(self.msg[3], None)
         mp3_files = []
         for item in path_files:
             if string.rfind(item, ".mp3") == -1:
@@ -566,10 +592,8 @@ class my_form(Frame):
 
         # check for mp3 files
         if len(mp3_files) == 0:
-            self.display_logging("No mp3 files found...", "r")
-            self.display_logging(
-            "\nNow we are finished, "
-            + "sorry, I think it was not enough time for coffee...", None)
+            self.display_logging(self.err[8], "r")
+            self.display_logging(self.msg[4], None)
             return
 
         # filename hack
@@ -577,12 +601,12 @@ class my_form(Frame):
                             check_and_mod_filenames(self, mp3_files))
         #return
         # trim silence, save tags
-        self.display_logging("\nTrim silence, this can take a while...", None)
+        self.display_logging(self.msg[5], None)
         for item in mp3_filenames_temp:
             trim_silence(self, item, dir_mod)
 
         # mp3Gain
-        self.display_logging("\nmp3Gain, this can take a while...", None)
+        self.display_logging(self.msg[6], None)
         for item in mp3_filenames_mod:
             mp3gain(self, item)
             #self.display_logging(extract_filename(item), None)
@@ -597,7 +621,7 @@ class my_form(Frame):
         # remove dir_temp
         try:
             shutil.rmtree(dir_temp)
-            self.display_logging("\nTemp Directory removed...", None)
+            self.display_logging(self.msg[7], None)
         except Exception, e:
             self.display_logging("Error: %s" % str(e), None)
 
@@ -606,7 +630,7 @@ class my_form(Frame):
             for _file in os.listdir(dir_mod):
                 shutil.move(dir_mod + "/" + _file, workin_path)
             shutil.rmtree(dir_mod)
-            self.display_logging("\nMod Directory removed...", None)
+            self.display_logging(self.msg[8], None)
         except Exception, e:
             ac.log_message_summary_not_moved = True
             self.display_logging("Error: %s" % str(e), "r")
