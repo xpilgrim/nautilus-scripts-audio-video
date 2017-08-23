@@ -108,7 +108,7 @@ def switch_lang(self):
             + "das dauert etwas...")
         self.msg.append("\nmp3Gain berechnen...")  # 6
         self.msg.append("\nTemp Verzeichnis geloescht...")
-        self.msg.append("\nMod Verzeichnis geloescht...")  # 8
+        self.msg.append("Mod Verzeichnis geloescht...")  # 8
         self.msg.append("\nBitte Folgendes beachten!")
         self.msg.append("Diese Dateien konnten nicht bearbeitet werden, "
             + "sie haben eine zu niedrige Bitrate")  # 10
@@ -124,6 +124,8 @@ def switch_lang(self):
         self.msg.append("\nBearbeitete Dateien werden gespeichert in:")
         self.msg.append("\nOriginale sichern, Dateinamen bearbeiten...")  # 18
         self.msg.append("\nDateiname geaendert:")
+        self.msg.append("Bitrate zu niedrig, Datei uebersprungen...")  # 20
+        self.msg.append("Verlustfrei getrimmt: ")
 
         self.err.append("Fehlendes Paket ")
         self.err.append(" Bitte installieren durch\n sudo apt-get install ")
@@ -148,7 +150,7 @@ def switch_lang(self):
         self.msg.append("\nTrim silence, edit Tags, this can take a while...")
         self.msg.append("\nmp3Gain, this can take a while...")  # 6
         self.msg.append("\nTemp Directory removed...")
-        self.msg.append("\nMod Directory removed...")  # 8
+        self.msg.append("Mod Directory removed...")  # 8
         self.msg.append("\nPlease take care about the following issues!")
         self.msg.append("This files are not editable, "
             + "while they have to low bitrate:")  # 10
@@ -165,6 +167,8 @@ def switch_lang(self):
         self.msg.append("\nModified files will be saved in:")
         self.msg.append("\nBackup files, check filenames...")  # 18
         self.msg.append("\nModified filename:")
+        self.msg.append("Bitrate to low, file will be skipped...")  # 20
+        self.msg.append("Lossless trimmed: ")
 
         self.err.append("Missing package ")  # 1
         self.err.append("!\nPlease install it with:\n sudo apt-get install ")
@@ -374,7 +378,7 @@ def trim_silence(self, mp3_file_temp, dir_mod):
         self.display_logging("Error: %s" % str(e), "r")
 
     if mp3_bitrate < ac.app_mp3_bitrate:
-        self.display_logging("Bitrate to low, file will be skipped...", "r")
+        self.display_logging(self.msg[20], "r")
         ac.log_message_summary_bitrate.append(
                                 extract_filename(mp3_file_temp))
         return None
@@ -412,7 +416,7 @@ def trim_silence(self, mp3_file_temp, dir_mod):
                     string.rfind(filename_trimmed, ".mp3")] + "_trimmed.mp3")
         mp3_file_temp = os.path.dirname(mp3_file_temp) + "/" + filename_trimmed
         shutil.copy(mp3_file_temp, mp3_file_mod)
-        self.display_logging("Lossless trimmed: " +
+        self.display_logging(self.msg[21] +
                                 extract_filename(mp3_file_mod), None)
 
     # check if lenght is different between orig and edited file
@@ -426,7 +430,7 @@ def trim_silence(self, mp3_file_temp, dir_mod):
         return None
 
     if math.modf(mp3_length)[1] == math.modf(mp3_length_trimmed)[1]:
-        self.display_logging("No trimming necessary...", None)
+        #self.display_logging("No trimming necessary...", None)
         # no change in length, copy audio from orig to mod
         try:
             shutil.copy(mp3_file_temp, mp3_file_mod)
