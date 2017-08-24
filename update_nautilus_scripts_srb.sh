@@ -61,7 +61,7 @@ do
 		then
 		continue
 	fi
-	if [ "$i" == "README" ] 
+	if [ "$i" == "README.md" ] 
 		then
 		continue
 	fi
