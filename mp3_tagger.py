@@ -61,10 +61,9 @@ class app_config(object):
     def __init__(self):
         """Settings"""
         # app_config
-        self.app_desc = u"mp3 Tagger"
+        self.app_desc = u"Simple mp3 Tagger"
         # for normal usage set to no!!!!!!
         self.app_windows = "no"
-        self.app_errorfile = "error_mp3_tagger.log"
 
 
 def switch_lang(self):
