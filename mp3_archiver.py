@@ -89,7 +89,6 @@ class app_config(object):
         self.log_message_summary_not_moved = None
         # for normal usage set to no!!!!!!
         self.app_windows = "no"
-        self.app_errorfile = "error_audio_archiver.log"
 
 
 def switch_lang(self):
