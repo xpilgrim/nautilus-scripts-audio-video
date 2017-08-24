@@ -17,12 +17,12 @@
 
 echo "Nautilus-Scripts aktualisieren..."
 echo "install additional packages"
-sudo apt-get install python-tk python-mutagen sox mp3gain mp3splt
+sudo apt-get install python-tk python-mutagen mp3splt
 echo "Delete old files except avconvert"
 find /home/$USER/.local/share/nautilus/scripts -type f -not -name 'avconvert' -print0 | xargs -0 rm --
 
 echo "copy scripts"
-for i in *.sh
+for i in $*
 do
    :
 	if [ "$i" == "install_nautilus_scripts_ubuntu_13_local.sh" ] 
