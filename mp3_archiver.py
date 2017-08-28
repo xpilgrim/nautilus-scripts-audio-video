@@ -83,9 +83,12 @@ class app_config(object):
         # you must use 99 instead,
         # see the man soxformat option -C for the reason!
         self.app_mp3_encode_quality = 2
+        # show warning when trimmed file is more then x seconds shorter:
+        self.app_max_lenght_diff = 5
         self.log_message_summary_bitrate = []
         self.log_message_summary_id3tag = []
         self.log_message_summary_no_silence = []
+        self.log_message_summary_max_lenght_diff = []
         self.log_message_summary_not_moved = None
         # for normal usage set to no!!!!!!
         self.app_windows = "no"
@@ -125,6 +128,8 @@ def switch_lang(self):
         self.msg.append("\nDateiname geaendert:")
         self.msg.append("Bitrate zu niedrig, Datei uebersprungen...")  # 20
         self.msg.append("Verlustfrei getrimmt: ")
+        self.msg.append("\nDiese Dateien wurden moeglicherweise "
+            + "nicht richtig getrimmt, bitte manuell kontrollieren:")
 
         self.err.append("Fehlendes Paket ")
         self.err.append(" Bitte installieren durch\n sudo apt-get install ")
@@ -168,6 +173,8 @@ def switch_lang(self):
         self.msg.append("\nModified filename:")
         self.msg.append("Bitrate to low, file will be skipped...")  # 20
         self.msg.append("Lossless trimmed: ")
+        self.msg.append("\nThis files are trimmed very short, "
+            + "please analyse manually:")
 
         self.err.append("Missing package ")  # 1
         self.err.append("!\nPlease install it with:\n sudo apt-get install ")
@@ -428,6 +435,7 @@ def trim_silence(self, mp3_file_temp, dir_mod):
         self.display_logging("Error: %s" % str(e), "r")
         return None
 
+    # compare length with full seconds, no milliseconds
     if math.modf(mp3_length)[1] == math.modf(mp3_length_trimmed)[1]:
         #self.display_logging("No trimming necessary...", None)
         # no change in length, copy audio from orig to mod
@@ -437,6 +445,11 @@ def trim_silence(self, mp3_file_temp, dir_mod):
                                 extract_filename(mp3_file_temp))
         except Exception, e:
             self.display_logging("Error: %s" % str(e), "r")
+    else:
+        if ((math.modf(mp3_length)[1] - ac.app_max_lenght_diff) >
+            math.modf(mp3_length_trimmed)[1]):
+            ac.log_message_summary_max_lenght_diff.append(
+                                extract_filename(mp3_file_temp))
 
     write_id3_tags(self, mp3_file_mod, author, title)
     #self.display_logging(p)
@@ -691,10 +704,16 @@ class my_form(Frame):
             for item in ac.log_message_summary_no_silence:
                 self.display_logging(item, None)
 
+        if len(ac.log_message_summary_max_lenght_diff) != 0:
+            self.display_logging(self.msg[22], "r")
+            for item in ac.log_message_summary_max_lenght_diff:
+                self.display_logging(item, None)
+
         if ac.log_message_summary_not_moved is True:
             self.display_logging(self.msg[13], "r")
 
         self.display_logging(self.msg[14], None)
+        self.textBox.see(END)
 
         # Button for calling easyTAG editor
         #self.pressButton.pack()
