@@ -364,10 +364,27 @@ def mp3gain(self, mp3_file):
         self.display_logging("File skipped...", "r")
 
 
+def trim_and_recode(self, mp3_file_temp, mp3_file_mod):
+    """trim silence and recode with sox"""
+    compression_and_quality = (str(ac.app_mp3_bitrate) + "."
+                                + str(ac.app_mp3_encode_quality))
+    try:
+        #subprocess.Popen(["sox", mp3_file_temp, "-C", "192.2", mp3_file_mod,
+        subprocess.Popen(["sox", mp3_file_temp,
+                "-C", compression_and_quality, mp3_file_mod,
+                "silence", "1", "0.1", "1%", "reverse",
+                "silence", "1", "0.1", "1%", "reverse"],
+                stdout=subprocess.PIPE, stderr=subprocess.PIPE).communicate()
+        return True
+    except Exception, e:
+        self.display_logging("Error: %s" % str(e), "r")
+        return None
+
+
 def trim_silence(self, mp3_file_temp, dir_mod):
     """trim_silence and save and rewrite ID3Tags
 
-    Info about rewriteing id3tags:
+    Info about rewriting id3tags:
     After editing the file with sox,
     the present id3tags are written in id3v2.3 with wrong encodings
     therefor we save and rewrite the necessary tags in v2.4
@@ -398,20 +415,12 @@ def trim_silence(self, mp3_file_temp, dir_mod):
     #self.display_logging(mp3_file_mod)
     #sox "$file_path_orig" -C 192.2 "$file" silence 1 0.1 1% reverse
     #silence 1 0.1 1% reverse
-    compression_and_quality = (str(ac.app_mp3_bitrate) + "."
-                                + str(ac.app_mp3_encode_quality))
+
     # start subprocesses
     if mp3_bitrate > ac.app_mp3_bitrate:
         # trim silence with recode to bitrate
-        try:
-        #subprocess.Popen(["sox", mp3_file_temp, "-C", "192.2", mp3_file_mod,
-            subprocess.Popen(["sox", mp3_file_temp,
-                "-C", compression_and_quality, mp3_file_mod,
-                "silence", "1", "0.1", "1%", "reverse",
-                "silence", "1", "0.1", "1%", "reverse"],
-                stdout=subprocess.PIPE, stderr=subprocess.PIPE).communicate()
-        except Exception, e:
-            self.display_logging("Error: %s" % str(e), "r")
+        success = trim_and_recode(self, mp3_file_temp, mp3_file_mod)
+        if success is not True:
             return None
     else:
         # trim silence lossless without recode
