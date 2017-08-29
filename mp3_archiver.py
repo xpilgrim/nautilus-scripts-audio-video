@@ -346,7 +346,7 @@ def mp3gain(self, mp3_file):
     self.display_logging(extract_filename(mp3_file), None)
     # start subprocess
     try:
-        p = subprocess.Popen(["mp3gain", "-r", mp3_file],
+        p = subprocess.Popen(["mp3gain", mp3_file],
                 stdout=subprocess.PIPE, stderr=subprocess.PIPE).communicate()
     except Exception, e:
         self.display_logging("Error: %s" % str(e), "r")
