@@ -84,11 +84,11 @@ class app_config(object):
         # see the man soxformat option -C for the reason!
         self.app_mp3_encode_quality = 2
         # show warning when trimmed file is more then x seconds shorter:
-        self.app_max_lenght_diff = 5
+        self.app_max_length_diff = 5
         self.log_message_summary_bitrate = []
         self.log_message_summary_id3tag = []
         self.log_message_summary_no_silence = []
-        self.log_message_summary_max_lenght_diff = []
+        self.log_message_summary_max_length_diff = []
         self.log_message_summary_not_moved = None
         # for normal usage set to no!!!!!!
         self.app_windows = "no"
@@ -128,8 +128,8 @@ def switch_lang(self):
         self.msg.append("\nDateiname geaendert:")
         self.msg.append("Bitrate zu niedrig, Datei uebersprungen...")  # 20
         self.msg.append("Verlustfrei getrimmt: ")
-        self.msg.append("\nDiese Dateien wurden moeglicherweise "
-            + "nicht richtig getrimmt, bitte manuell kontrollieren:")
+        self.msg.append("\nDiese Dateien sind nach dem Trimmen um mehr als ")
+        self.msg.append(" Sekunden kuerzer, bitte manuell kontrollieren:")
 
         self.err.append("Fehlendes Paket ")
         self.err.append(" Bitte installieren durch\n sudo apt-get install ")
@@ -173,8 +173,8 @@ def switch_lang(self):
         self.msg.append("\nModified filename:")
         self.msg.append("Bitrate to low, file will be skipped...")  # 20
         self.msg.append("Lossless trimmed: ")
-        self.msg.append("\nThis files are trimmed very short, "
-            + "please analyse manually:")
+        self.msg.append("\nThis files are more then ")
+        self.msg.append(" seconds shorter, please analyse manually:")
 
         self.err.append("Missing package ")  # 1
         self.err.append("!\nPlease install it with:\n sudo apt-get install ")
@@ -434,7 +434,7 @@ def trim_silence(self, mp3_file_temp, dir_mod):
         self.display_logging(self.msg[21] +
                                 extract_filename(mp3_file_mod), None)
 
-    # check if lenght is different between orig and edited file
+    # check if length is different between orig and edited file
     try:
         audio = MP3(mp3_file_mod)
         mp3_length_trimmed = audio.info.length
@@ -455,9 +455,9 @@ def trim_silence(self, mp3_file_temp, dir_mod):
         except Exception, e:
             self.display_logging("Error: %s" % str(e), "r")
     else:
-        if ((math.modf(mp3_length)[1] - ac.app_max_lenght_diff) >
+        if ((math.modf(mp3_length)[1] - ac.app_max_length_diff) >
             math.modf(mp3_length_trimmed)[1]):
-            ac.log_message_summary_max_lenght_diff.append(
+            ac.log_message_summary_max_length_diff.append(
                                 extract_filename(mp3_file_temp))
 
     write_id3_tags(self, mp3_file_mod, author, title)
@@ -713,9 +713,10 @@ class my_form(Frame):
             for item in ac.log_message_summary_no_silence:
                 self.display_logging(item, None)
 
-        if len(ac.log_message_summary_max_lenght_diff) != 0:
-            self.display_logging(self.msg[22], "r")
-            for item in ac.log_message_summary_max_lenght_diff:
+        if len(ac.log_message_summary_max_length_diff) != 0:
+            msg = self.msg[22] + str(ac.app_max_length_diff) + self.msg[23]
+            self.display_logging(msg, "r")
+            for item in ac.log_message_summary_max_length_diff:
                 self.display_logging(item, None)
 
         if ac.log_message_summary_not_moved is True:
