@@ -1,3 +1,5 @@
+**Moved to codeberg.org!**
+
 nautilus-scripts
 ================
 
